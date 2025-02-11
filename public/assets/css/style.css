@@ -1,0 +1,58 @@
+.borderSatuan .form-group label {
+    color:white;
+}
+
+
+.borderParameter {
+    background-color: #4CEA67;
+    z-index: 10;
+    border-radius: 10px;
+    margin: 0 10px 10px 10px;
+}
+
+.borderParameter .form-group {
+  margin-bottom: 15px;
+}
+
+.borderParameter label {
+  font-weight: bold;
+}
+
+.borderParameter select {
+  width: 100%;
+  padding: 6px 12px;
+  font-size: 14px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  box-sizing: border-box;
+}
+
+
+
+
+
+.borderSatuan {
+    background-color: #fb160a;
+    z-index: 10;
+    border-radius: 10px;
+    margin: 0 10px 10px 10px;
+}
+
+.borderSatuan .form-group {
+  margin-bottom: 15px;
+}
+
+.borderSatuan label {
+  font-weight: bold;
+}
+
+.borderSatuan select {
+  width: 100%;
+  padding: 6px 12px;
+  font-size: 14px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  box-sizing: border-box;
+}
+
+
