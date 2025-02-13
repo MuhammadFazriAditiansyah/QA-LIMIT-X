@@ -23,7 +23,7 @@
             </div>
             <div class="form-input">
                 <span><i class="fa-solid fa-phone"></i></span>
-                <input type="number" name="nohp" placeholder="No. Handphone" required>
+                <input type="text" name="nohp" placeholder="Username" required>
             </div>
             <div class="form-input">
                 <span><i class="fa fa-envelope-o"></i></span>
@@ -38,12 +38,12 @@
                 <select class="form-control" name="jabatan">
                     <option hidden>-- Pilih Jenis Jabatan --</option>
 
-                    @foreach ($roles as $role)
-                        <option value="{{ $role['id'] }}">{{ $role['name'] }}</option>
+                    @foreach (['operator', 'staff',] as $role)
+                    <option value="{{ $loop->index + 1 }}">{{ ucfirst($role) }}</option>
                     @endforeach
 
                 </select>
-            </div>
+                </div>
 
             <span style="margin-top:3%;">Alamat</span>
             <div class="form-input" style="margin-top:5%;">

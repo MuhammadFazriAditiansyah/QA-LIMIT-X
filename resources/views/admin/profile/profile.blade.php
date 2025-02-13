@@ -58,7 +58,7 @@
                       <b>Friends</b> <a class="float-right">13,287</a>
                     </li>
                   </ul> --}}
-                  <p align="center">kamu sekarang adalah 
+                  <p align="center">kamu sekarang adalah
                       @if(Auth::user()->jabatan == 1)
                           Operator
                       @elseif(Auth::user()->jabatan == 2)
@@ -112,7 +112,7 @@
                                   {{Session::get('successUpdate')}}
                               </div>
                           @endif
-                            
+
 
                           <div class="card-body">
                               <div class="row">
@@ -157,7 +157,7 @@
                                           </div>
                                       </div>
                                   </div>
-                            
+
                                   <div class="form-group">
                                       <label>Alamat</label>
                                       <textarea class="form-control summernote-simple" name="alamat" value="{{ $users['alamat'] }}" required="">{{ $users['alamat'] }}</textarea>
@@ -166,7 +166,7 @@
                                       </div>
                                   </div>
                           </div>
-        
+
                           <div class="card-footer">
                               <button type="submit" class="btn btn-primary float-right">Simpan Perubahan</button>
                               <a href="/superadmin/profile/password" class="btn btn-danger">Ganti Password</a>
@@ -175,7 +175,7 @@
                       </form>
                     </div>
                     <!-- /.card -->
-        
+
                   </div>
                   <!--/.col (right) -->
                 </div>
@@ -469,4 +469,4 @@
 
 
 
-@endsection 
+@endsection

@@ -27,7 +27,7 @@
                         <i class="fas fa-sign-out-alt"></i> Logout
                     </a>
 
-                    
+
                      {{-- <a href="features-activities.html" class="dropdown-item has-icon">
                         <i class="fas fa-bolt"></i> Activities
                     </a> --}}
@@ -45,10 +45,10 @@
                 <img alt="image" src="{{asset('assets/img/futami bg.png')}}" class="rounded-medium justify-content-center" style="margin-top:5%; width:auto; height:70px; border-radius:50%;">
             </div>
             <div class="sidebar-brand sidebar-brand-sm ">
-                {{-- <a href="index.html">FO</a> --}} 
+                {{-- <a href="index.html">FO</a> --}}
                 <img alt="image" src="{{asset('assets/img/logo-futami-sidebar.png')}}" class="rounded-circle justify-content-center" style="margin-top:5%; width:auto; height:50px; border-radius:50%;">
             </div>
-            
+
 
 
 
@@ -71,7 +71,7 @@
 
             </ul>
             <hr>
-        </aside> 
+        </aside>
     </div>
 
       <!-- Main Content -->
@@ -89,7 +89,7 @@
             <div class="row mt-sm-4">
               <div class="col-12 col-md-12 col-lg-5">
                 <div class="card profile-widget">
-                  <div class="profile-widget-header">                     
+                  <div class="profile-widget-header">
                     <img alt="image" src="{{asset('assets/template/stisla/assets/img/avatar/avatar-3.png')}}" class="rounded-circle profile-widget-picture">
                     {{-- <div class="profile-widget-items">
                       <div class="profile-widget-item">
@@ -107,8 +107,8 @@
                     </div> --}}
                   </div>
                   <div class="profile-widget-description">
-                    <div class="profile-widget-name">{{ Auth::user()->nama }} 
-                        <div class="text-muted d-inline font-weight-normal"><div class="slash"></div> 
+                    <div class="profile-widget-name">{{ Auth::user()->nama }}
+                        <div class="text-muted d-inline font-weight-normal"><div class="slash"></div>
                             @if(Auth::user()->jabatan == 1)
                                 Operator
                             @elseif(Auth::user()->jabatan == 2)
@@ -120,7 +120,7 @@
                             @endif
                         </div>
                     </div>
-                    {{ Auth::user()->nama }} adalah seorang  
+                    {{ Auth::user()->nama }} adalah seorang
                     @if(Auth::user()->jabatan == 1)
                         Operator
                     @elseif(Auth::user()->jabatan == 2)
@@ -175,7 +175,7 @@
                         <h4>Edit Profile</h4>
                         </div>
                         <div class="card-body">
-                            <div class="row">                               
+                            <div class="row">
                             <div class="form-group col-md-6 col-12">
                                 <label>Name</label>
                                 <input type="text" name="nama" class="form-control" value="{{$users['nama']}}" required="">
@@ -184,7 +184,7 @@
                                 </div>
                             </div>
                             <div class="form-group col-md-6 col-12">
-                                <label>No.Handphone</label>
+                                <label>Username</label>
                                 <input type="tel" name="nohp" class="form-control" value="{{$users['nohp']}}" required="" disabled>
                                 <div class="invalid-feedback">
                                     Kolom ini harus di isi
@@ -205,7 +205,7 @@
                                 <div class="invalid-feedback">
                                     Kolom ini harus di isi
                                 </div>
-                            </div> 
+                            </div>
                             {{-- <div class="form-group col-md-6 col-12">
                                 <label>Password</label>
                                 <div class="input-group">
@@ -248,13 +248,13 @@
             Futami profile
         </div>
         <div class="footer-right">
-          
+
         </div>
       </footer> --}}
     </div>
   </div>
 
-  
+
 
 <script>
     $(document).ready(function() {
