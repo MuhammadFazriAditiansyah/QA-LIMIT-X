@@ -232,12 +232,8 @@ Route::middleware(['isLogin', 'cekRole:operator'])->group(function () {
 });
 
 Route::middleware(['isLogin', 'cekRole:operator,staff'])->group(function () {
-    Route::get('/exported-files', function () {
-        $files = ExportedFile::all();
-        return view('exports.exported_files', compact('files'));
-    })->name('exported.files');
     Route::get('/exported-files', [ExportedFileController::class, 'index'])->name('exported.files');
-    Route::post('/exported-files/download', [ExportedFileController::class, 'downloadMultiple'])->name('exported.files.download');
+    Route::post('/exported-files/download', [ExportedFileController::class, 'downloadMultipleAndExportExcel'])->name('exported.files.download');
 });
 
 Route::middleware(['isLogin', 'cekRole:staff'])->group(function () {
