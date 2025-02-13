@@ -49,32 +49,31 @@
 
 
 
-            <div class="form-input">
-              <span><i class="fa-solid fa-phone"></i></span>
-              <input type="number" name="nohp" placeholder="No. Handphone" required>
-            </div>
-            <div class="form-input">
-                <span><i class="fa fa-key"></i></span>
-                <input type="password" name="password" placeholder="Password" required>
-            </div>
-
-
-            <div class="mb-3">
-              <button type="submit" class="btn btn-block text-uppercase">
-                Login
-              </button>
-            </div>
-
-            <hr class="my-4">
-
-            <div class="text-center mb-2">
-              {{-- Tidak punya account? --}}
-              <a href="/" class="register-link">
-                kembali
-              </a>
-            </div>
-          </form>  
-        </div>
-
-@endsection
+            <div class="card">
+                <div class="img-left"></div>
+                <div class="card-body">
+                  <h2 class="title">Login Form</h2>
+                  <form action="/login" method="POST">
+                    <div class="form-input">
+                      <span><i class="fa-solid fa-user"></i></span>
+                      <input type="text" name="nohp" placeholder="Masukan UserName" required>
+                    </div>
+                    <div class="form-input">
+                      <span><i class="fa fa-key"></i></span>
+                      <input type="password" name="password" placeholder="Password" required>
+                    </div>
+                    <div class="mb-3">
+                      <button type="submit" class="btn btn-block text-uppercase">
+                        Login
+                      </button>
+                    </div>
+                    <hr class="my-4">
+                    <div class="text-center mb-2">
+                      <p>Belum punya account? <a href="/register" class="register-link">Register here</a></p>
+                      <a href="/" class="register-link">Kembali</a>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            @endsection
 

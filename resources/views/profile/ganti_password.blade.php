@@ -27,7 +27,7 @@
                         <i class="fas fa-sign-out-alt"></i> Logout
                     </a>
 
-                    
+
                      {{-- <a href="features-activities.html" class="dropdown-item has-icon">
                         <i class="fas fa-bolt"></i> Activities
                     </a> --}}
@@ -45,10 +45,10 @@
                 <img alt="image" src="{{asset('assets/img/futami bg.png')}}" class="rounded-medium justify-content-center" style="margin-top:5%; width:auto; height:70px; border-radius:50%;">
             </div>
             <div class="sidebar-brand sidebar-brand-sm ">
-                {{-- <a href="index.html">FO</a> --}} 
+                {{-- <a href="index.html">FO</a> --}}
                 <img alt="image" src="{{asset('assets/img/logo-futami-sidebar.png')}}" class="rounded-circle justify-content-center" style="margin-top:5%; width:auto; height:50px; border-radius:50%;">
             </div>
-            
+
 
 
 
@@ -70,14 +70,14 @@
 
             </ul>
             <hr>
-        </aside> 
+        </aside>
     </div>
 
       <!-- Main Content -->
           <div class="main-content">
             <section class="section">
               <div class="section-header">
-                <h1>Ganti Password</h1> 
+                <h1>Ganti Password</h1>
               </div>
               <div class="section-body">
                 <div class="row mt-sm-4 justify-content-center d-flex">
@@ -95,20 +95,20 @@
                                     </ul>
                                 </div>
                             @endif
-    
+
                             @if(Session::get('successVerify'))
                                 <div class="alert alert-success w-70">
                                     {{Session::get('successVerify')}}
                                 </div>
                             @endif
-    
+
 
 
                             <div class="card-header">
                                 <h4>Ganti Password</h4>
                             </div>
                             <div class="card-body">
-                                <div class="row">                               
+                                <div class="row">
                                     <div class="form-group col-md-12 col-12">
                                         <label>Password</label>
                                         <input type="text" name="password" class="form-control" required="">
@@ -137,20 +137,20 @@
                                     </ul>
                                 </div>
                             @endif
-                        
+
                             @if(Session::get('successVerify'))
                                 <div class="alert alert-success w-70">
                                     {{Session::get('successVerify')}}
                                 </div>
-                            @endif 
-    
+                            @endif
+
 
 
                             <div class="card-header">
                                 <h4>Ganti Password</h4>
                             </div>
                             <div class="card-body">
-                                <div class="row">                               
+                                <div class="row">
                                     <div class="form-group col-md-12 col-12">
                                         <label>Password</label>
                                         <input type="text" name="password" class="form-control" required="">
@@ -167,7 +167,7 @@
                                 <a href="/profile" class="btn btn-icon icon-left btn-danger" style="float: left;">Back</a>
                             </div>
                         </form>
-                        
+
                     </div>
                   </div>
                 </div>
@@ -179,13 +179,13 @@
             Futami profile
         </div>
         <div class="footer-right">
-          
+
         </div>
       </footer> --}}
     </div>
   </div>
 
-  
+
 
 <script>
     $(document).ready(function() {

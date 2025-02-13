@@ -48,7 +48,7 @@
                                             {{Session::get('successUpdate')}}
                                         </div>
                                     @endif
-                                    
+
 
                                     <div class="card-body">
                                         <div class="row">
@@ -64,7 +64,7 @@
                                             </div>
                                         </div>
                                     </div>
-                
+
                                     <div class="card-footer">
                                         <button type="submit" class="btn btn-primary float-right">Simpan Perubahan</button>
                                         <a href="/superadmin/profile" class="btn btn-danger float-left">Kembali</a>
@@ -72,7 +72,7 @@
                                 </form>
                             </div>
                             <!-- /.card -->
-                
+
                             </div>
                             <!--/.col (right) -->
                         </div>
@@ -88,4 +88,4 @@
         <!-- /.content -->
     </div>
 
-@endsection 
+@endsection
