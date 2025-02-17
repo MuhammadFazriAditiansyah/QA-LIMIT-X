@@ -33,9 +33,9 @@ class UserSeeder extends Seeder
         $sampel = new Sampel_mikrobiologi_bahan_kemas();
         $sampel = new Sampel_mikrobiologi_ruangan();
         $sampel = new Sampel_mikrobiologi_personil();
-        
 
-        
+
+
         $user = new User();
 
         User::create([

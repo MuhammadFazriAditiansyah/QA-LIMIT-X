@@ -28,12 +28,13 @@ class LoginController extends Controller
     //Route Register
     public function register()
     {
-        $roles = Role::all();
-        return view('halaman.register', compact('roles'));
+        $roles = Role::all();  // Ambil role untuk pilihan jabatan
+        return view('halaman.register', compact('roles'));  // Pastikan file view ada di lokasi yang benar
     }
 
     public function inputRegister(Request $request)
     {
+        // Validasi input
         $request->validate([
             'nama' => 'required|min:3|max:25',
             'nohp' => 'required|min:8|max:13|unique:users,nohp',
@@ -45,24 +46,26 @@ class LoginController extends Controller
             'nama.required' => 'Kolom nama harus di isi',
             'nohp.unique' => 'no handphone ini telah ada!',
             'nohp.required' => 'no handphone ini harus di isi!',
-            'email.unique' => 'enail ini telah ada!',
-            'email.required' => 'enail ini harus di isi!',
+            'email.unique' => 'email ini telah ada!',
+            'email.required' => 'email ini harus di isi!',
             'password.required' => 'Kolom password harus di isi',
             'jabatan.required' => 'Kolom jabatan harus di isi',
             'alamat.required' => 'Kolom alamat harus di isi',
         ]);
-        // tambah data ke db bagian table users
+
+        // Simpan data ke tabel users
         User::create([
             'nama' => $request->nama,
             'nohp' => $request->nohp,
             'email' => $request->email,
-            'password' => Hash::make($request->password), //request password itu adalah password
+            'password' => Hash::make($request->password),
             'jabatan' => $request->jabatan,
             'alamat' => $request->alamat,
-            'status' => 0,
-            'role_id' => $request->jabatan,
+            'status' => 0,  // status default
+            'role_id' => $request->jabatan,  // Menggunakan jabatan sebagai role_id
         ]);
-        return redirect('/login')->with('success', 'Anda berhasil membuat akun!'); //mereturn / lewat / , bukan lewat name yang diberikan
+
+        return redirect('/login')->with('success', 'Anda berhasil membuat akun!');  // Redirect ke login
     }
 
 
@@ -162,42 +165,42 @@ class LoginController extends Controller
      * @param  \App\Models\Login  $login
      * @return \Illuminate\Http\Response
      */
-    public function show(Login $login)
-    {
-        //
-    }
+    // public function show(Login $login)
+    // {
+    //     //
+    // }
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Models\Login  $login
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(Login $login)
-    {
-        //
-    }
+    // /**
+    //  * Show the form for editing the specified resource.
+    //  *
+    //  * @param  \App\Models\Login  $login
+    //  * @return \Illuminate\Http\Response
+    //  */
+    // public function edit(Login $login)
+    // {
+    //     //
+    // }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Login  $login
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, Login $login)
-    {
-        //
-    }
+    // /**
+    //  * Update the specified resource in storage.
+    //  *
+    //  * @param  \Illuminate\Http\Request  $request
+    //  * @param  \App\Models\Login  $login
+    //  * @return \Illuminate\Http\Response
+    //  */
+    // public function update(Request $request, Login $login)
+    // {
+    //     //
+    // }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  \App\Models\Login  $login
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy(Login $login)
-    {
-        //
-    }
+    // /**
+    //  * Remove the specified resource from storage.
+    //  *
+    //  * @param  \App\Models\Login  $login
+    //  * @return \Illuminate\Http\Response
+    //  */
+    // public function destroy(Login $login)
+    // {
+    //     //
+    // }
 }

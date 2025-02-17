@@ -72,20 +72,19 @@
                     <tr style="border-style: hidden;">
                         <td colspan="2">No. </td>
                         <td align="center" style="border-style: hidden;">:</td>
-                        <td colspan="7">{{ $mikrobiologi_airs->nodokumen }}</td> <!-- Mengurangi colspan di sini -->
+                        <td colspan="7">{{ $mikrobiologi_airs->nodokumen ?? 'Data tidak tersedia' }}</td>
                     </tr>
                     <tr style="border-style: hidden;">
                         <td colspan="2">Tgl Inokulasi</td>
                         <td align="center" style="border-style: hidden;">:</td>
-                        <td colspan="7">
-                            {{ Carbon\Carbon::parse($mikrobiologi_airs->tgl_inokulasi)->translatedFormat('d M Y') }}
-                        </td>
+                        <td colspan="7">{{ $mikrobiologi_airs ? Carbon\Carbon::parse($mikrobiologi_airs->tgl_inokulasi)->translatedFormat('d M Y') : 'Data tidak tersedia' }}</td>
                     </tr>
                     <tr style="border-style: hidden;">
                         <td colspan="2">Tgl Pengamatan</td>
                         <td align="center" style="border-style: hidden;">:</td>
-                        <td colspan="7">{{ $mikrobiologi_airs->tgl_pengamatan }}</td> <!-- Mengurangi colspan di sini -->
+                        <td colspan="7">{{ $mikrobiologi_airs->tgl_pengamatan ?? 'Data tidak tersedia' }}</td>
                     </tr>
+
                 </table>
             </td>
         </tr>
@@ -95,9 +94,16 @@
                     <tr>
                         <td align="center">No.</td>
                         <td colspan="3" align="center">Sampel air</td>
-                        <td align="center" colspan="2">TPC({{ $mikrobiologi_airs->satuan_tpc }})</td>
-                        <td align="center" colspan="2">Yeast Mold ({{ $mikrobiologi_airs->satuan_yeast_mold }})</td>
-                        <td align="center" colspan="2">Coliform({{ $mikrobiologi_airs->satuan_coliform }})</td>
+                        <td align="center" colspan="2">
+                            TPC({{ $mikrobiologi_airs->satuan_tpc ?? 'N/A' }})
+                        </td>
+                        <td align="center" colspan="2">
+                            Yeast Mold ({{ $mikrobiologi_airs->satuan_yeast_mold ?? 'N/A' }})
+                        </td>
+                        <td align="center" colspan="2">
+                            Coliform({{ $mikrobiologi_airs->satuan_coliform ?? 'N/A' }})
+                        </td>
+
                         <td colspan="2" align="center">Keterangan</td>
                     </tr>
                     @foreach ($sampel_mikrobiologi_airs as $sampel_mikrobiologi_air)
@@ -118,7 +124,12 @@
 
 
     <div class="export-excel" style="padding:10px; float:right;">
+        @if($mikrobiologi_airs)
         <a href="/mikrobiologi_air/exportExcel/{{ $mikrobiologi_airs->id }}" onclick="hideLogoImage()">Export</a>
+    @else
+        <p>Data tidak tersedia.</p>
+    @endif
+
     </div>
 </body>
 </html>

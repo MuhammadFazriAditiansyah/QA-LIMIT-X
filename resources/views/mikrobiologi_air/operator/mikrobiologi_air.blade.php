@@ -95,8 +95,8 @@
                                             <tr>
                                                 <th>No</th>
                                                 <th>No.Dokumen</th>
-                                                <th>Tgl. Inokulasi</th>
                                                 <th>Nama Produk</th>
+                                                <th>Tgl. Inokulasi</th>
                                                 {{-- <th>Tgl. Pengamatan</th> --}}
                                                 <th>TTD Operator</th>
                                                 <th>TTD Staff</th>
