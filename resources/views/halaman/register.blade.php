@@ -9,7 +9,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css" rel="stylesheet">
     <style>
         body {
-            background-color: #28a745;
+            background-color: rgb(239, 239, 239);
             margin: 0;
             padding: 0;
             font-family: Arial, sans-serif;

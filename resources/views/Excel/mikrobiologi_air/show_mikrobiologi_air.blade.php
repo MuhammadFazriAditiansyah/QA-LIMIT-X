@@ -119,7 +119,7 @@
 
     <div class="export-excel" style="padding: 10px; float: right; background-color: rgb(0, 213, 0); margin-top: 10px; border-radius: 5px;">
         <a href="/mikrobiologi_air/exportExcel/{{ $mikrobiologi_airs->id }}" onclick="hideLogoImage()" style="color: rgb(255, 255, 255); text-decoration: none;">Export</a>
-    </div>        
+    </div>
 </body>
 </html>
 

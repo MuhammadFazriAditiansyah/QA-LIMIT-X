@@ -23,50 +23,40 @@ class ExportedFileController extends Controller
         return view('exports.exported_files', compact('files'));
     }
 
+
     public function downloadMultipleAndExportExcel(Request $request)
-{
-    $fileIds = $request->input('file_ids', []);
-    if (empty($fileIds)) {
-        return redirect()->back()->with('error', 'Tidak ada file yang dipilih.');
-    }
-
-    $zipFileName = 'files-' . time() . '.zip';
-    $zipFilePath = storage_path('app/public/downloads/' . $zipFileName);
-
-    if (!file_exists(storage_path('app/public/downloads'))) {
-        mkdir(storage_path('app/public/downloads'), 0755, true);
-    }
-
-    $zip = new ZipArchive();
-    if ($zip->open($zipFilePath, ZipArchive::CREATE | ZipArchive::OVERWRITE) === true) {
-        foreach ($fileIds as $id) {
-            $mikrobiologi_airs = ExportedFile::find($id);
-            if (!$mikrobiologi_airs) {
-                continue;
-            }
-
-            $nodokumen = explode('/', $mikrobiologi_airs->nodokumen);
-            $dokumen = implode('_', $nodokumen);
-            $filename = $dokumen . '.xlsx';
-            $relativePath = 'exports/' . $filename;
-            $filePath = storage_path('app/public/' . $relativePath);
-
-            // Simpan file Excel jika belum ada
-            if (!Storage::disk('public')->exists($relativePath)) {
-                Excel::store(new MikrobiologiAirExport($id), $relativePath, 'public');
-            }
-
-            // Tambahkan file ke ZIP hanya jika benar-benar ada
-            if (Storage::disk('public')->exists($relativePath)) {
-                $zip->addFile($filePath, $filename);
-            }
+    {
+        $fileIds = $request->input('file_ids', []);
+        if (empty($fileIds)) {
+            return redirect()->back()->with('error', 'Tidak ada file yang dipilih.');
         }
 
-        $zip->close();
+        $zipFileName = 'files-' . time() . '.zip';
+        $zipFilePath = storage_path('app/public/downloads/' . $zipFileName);
 
-        return response()->download($zipFilePath)->deleteFileAfterSend(true);
-    } else {
-        return redirect()->back()->with('error', 'Gagal membuat file ZIP.');
+        if (!file_exists(storage_path('app/public/downloads'))) {
+            mkdir(storage_path('app/public/downloads'), 0755, true);
+        }
+
+        $zip = new ZipArchive();
+        if ($zip->open($zipFilePath, ZipArchive::CREATE | ZipArchive::OVERWRITE) === true) {
+            foreach ($fileIds as $id) {
+                $exportedFile = ExportedFile::find($id);
+
+                if (!$exportedFile || !Storage::disk('public')->exists('exports/' . $exportedFile->filename)) {
+                    continue;
+                }
+
+                $filePath = storage_path('app/public/exports/' . $exportedFile->filename);
+
+                $zip->addFile($filePath, $exportedFile->filename);
+            }
+
+            $zip->close();
+
+            return response()->download($zipFilePath)->deleteFileAfterSend(true);
+        } else {
+            return redirect()->back()->with('error', 'Gagal membuat file ZIP.');
+        }
     }
-}
 }

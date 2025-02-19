@@ -397,7 +397,7 @@ class MikrobiologiAirController extends Controller
         ]);
 
         // Download file ke pengguna
-        return response()->download($path);     
+        return response()->download($path);
     }
 
 
