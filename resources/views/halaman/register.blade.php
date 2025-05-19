@@ -61,13 +61,13 @@
         .form-input select,
         .form-input textarea {
             padding-left: 35px;
-            height: 35px; /* Memperkecil tinggi input */
+            height: 40px; /* Memperkecil tinggi input */
             font-size: 14px; /* Menyesuaikan ukuran font */
         }
 
         .form-input textarea {
             resize: none;
-            height: 35px; /* Mengatur tinggi textarea */
+            height: 47px; /* Mengatur tinggi textarea */
         }
 
         .btn {
@@ -176,3 +176,4 @@
 </body>
 
 </html>
+

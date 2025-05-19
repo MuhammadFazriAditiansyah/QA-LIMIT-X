@@ -209,8 +209,8 @@
     </table>
 
 
-    <div class="export-excel" style="padding:10px; float:right;">
-        <a href="/laporan_analisa_air/exportExcel/{{ $laporan_analisa_air->id }}" onclick="hideLogoImage()">Export</a>
+    <div class="export-excel" style="padding: 10px; float: right; background-color: rgb(0, 213, 0); margin-top: 10px; border-radius: 5px;">
+        <a href="/laporan_analisa_air/exportExcel/{{ $laporan_analisa_air->id }}" onclick="hideLogoImage()" style="color: rgb(255, 255, 255); text-decoration: none;">Export</a>
     </div>
 </body>
 </html>

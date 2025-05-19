@@ -2,7 +2,7 @@
 
 <div class="content-wrapper" style="margin-top: 130px; margin-left: 250px;">
     <div class="d-flex justify-content-center p-2 w-100">
-        <form method="GET" action="{{ route('exported.files') }}" class="w-50">
+        <form method="GET" action="{{ route('exported.files.kimia') }}" class="w-50">
             <div class="d-flex justify-content-center">
                 <div class="input-group shadow-sm rounded-pill w-100">
                     <input
@@ -21,7 +21,7 @@
         </form>
     </div>
 
-    <form method="POST" action="{{ route('exported.files.download') }}">
+    <form method="POST" action="{{ route('exported.files.kimia.download') }}">
         @csrf
         <div class="table-responsive">
             <table class="table table-hover text-center">
@@ -30,7 +30,6 @@
                         <th scope="col">
                             <input type="checkbox" id="select_all" /> Pilih semua
                         </th>
-                        {{-- <th scope="col">No</th> --}}
                         <th scope="col">Nama File</th>
                         <th scope="col">Jenis</th>
                         <th scope="col">Tanggal Export</th>
@@ -43,12 +42,11 @@
                             <td>
                                 <input type="checkbox" name="file_ids[]" value="{{ $file->id }}" class="file-checkbox">
                             </td>
-                            {{-- <td>{{ $index + 1 }}</td> --}}
                             <td class="text-left">{{ $file->filename }}</td>
                             <td>{{ $file->type }}</td>
                             <td>{{ $file->created_at->format('d M Y') }}</td>
                             <td>
-                                <a href="{{ $file->path }}" style="color: green; font-size: 1.5em;"  download>
+                                <a href="{{ $file->path }}" style="color: green; font-size: 1.5em;" download>
                                     <i class="fas fa-download"></i>
                                 </a>
                             </td>

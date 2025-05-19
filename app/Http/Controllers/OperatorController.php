@@ -16,14 +16,15 @@ use Illuminate\Support\Facades\Hash;
 use RealRashid\SweetAlert\Facades\Alert;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\AnalisaKimiaExport;
+use App\Models\ExportedFileKimia;
 
 class OperatorController extends Controller
 {
-     //Route Operator
-     public function operator()
-     {
-         return view('operator.operator');
-     }
+    //Route Operator
+    public function operator()
+    {
+        return view('operator.operator');
+    }
 
     public function data(Request $request)
     {
@@ -61,23 +62,23 @@ class OperatorController extends Controller
     }
 
 
-     public function tambahData()
-     {
-         return view('operator.tambahData');
-     }
+    public function tambahData()
+    {
+        return view('operator.tambahData');
+    }
 
-     public function inputData(Request $request)
-     {
-         $request->validate([
+    public function inputData(Request $request)
+    {
+        $request->validate([
             //  'nodokumen' => 'required|min:5|unique:futamis,nodokumen',
-             'nodokumen' => 'required|min:5',
-             'pemberi_sampel' => 'required',
-             'parameter_pengujian' => 'required|min:5',
-             'jumlah_sampel' => 'required',
-             'tanggal_terima' => 'required',
-             'tanggal_uji' => 'required',
-             'tanggal_selesai' => 'required',
-         ],[
+            'nodokumen' => 'required|min:5',
+            'pemberi_sampel' => 'required',
+            'parameter_pengujian' => 'required|min:5',
+            'jumlah_sampel' => 'required',
+            'tanggal_terima' => 'required',
+            'tanggal_uji' => 'required',
+            'tanggal_selesai' => 'required',
+        ], [
             'nodokumen.unique' => 'no dokumen ini telah ada!',
             'nodokumen.required' => 'no dokumen ini harus di isi!',
             'pemberi_sampel.required' => 'Kolom pemberi_sampel harus di isi',
@@ -86,36 +87,36 @@ class OperatorController extends Controller
             'tanggal_terima.required' => 'Kolom tanggal_terima harus di isi',
             'tanggal_uji.required' => 'Kolom tanggal_uji harus di isi',
             'tanggal_selesai.required' => 'Kolom tanggal_selesai harus di isi',
-         ]);
+        ]);
 
-         $request->validate([
+        $request->validate([
             'sampel' => 'required',
             'parameter_nilaiuji' => 'required',
             'spesifikasi' => 'required|min:5',
             'keterangan' => 'required|min:5',
         ]);
 
-         // tambah data ke db bagian table Futami
-         Futami::create([
-             'nodokumen' => $request->nodokumen,
-             'pemberi_sampel' => $request->pemberi_sampel,
-             'parameter_pengujian' => $request->parameter_pengujian,
-             'jumlah_sampel' => $request->jumlah_sampel,
-             'tanggal_terima' => $request->tanggal_terima,
-             'tanggal_uji' => $request->tanggal_uji,
-             'tanggal_selesai' => $request->tanggal_selesai,
+        // tambah data ke db bagian table Futami
+        Futami::create([
+            'nodokumen' => $request->nodokumen,
+            'pemberi_sampel' => $request->pemberi_sampel,
+            'parameter_pengujian' => $request->parameter_pengujian,
+            'jumlah_sampel' => $request->jumlah_sampel,
+            'tanggal_terima' => $request->tanggal_terima,
+            'tanggal_uji' => $request->tanggal_uji,
+            'tanggal_selesai' => $request->tanggal_selesai,
 
-             'sampel' => $request->sampel,
-             'parameter_nilaiuji' => $request->parameter_nilaiuji,
-             'spesifikasi' => $request->spesifikasi,
-             'keterangan' => $request->keterangan,
+            'sampel' => $request->sampel,
+            'parameter_nilaiuji' => $request->parameter_nilaiuji,
+            'spesifikasi' => $request->spesifikasi,
+            'keterangan' => $request->keterangan,
 
-             'statusOP' => 0,
-             'statusST' => 0,
-             'statusSP' => 0,
-         ]);
+            'statusOP' => 0,
+            'statusST' => 0,
+            'statusSP' => 0,
+        ]);
 
-         Futami_sampel_kimia::create([
+        Futami_sampel_kimia::create([
             'sampel' => $request->sampel,
             'parameter_nilaiuji' => $request->parameter_nilaiuji,
             'spesifikasi' => $request->spesifikasi,
@@ -123,7 +124,7 @@ class OperatorController extends Controller
         ]);
 
         return redirect('/operator/data')->with('successAdd', 'Berhasil membuat Data Baru!'); //mereturn / lewat / , bukan lewat name yang diberikan
-     }
+    }
 
 
     public function data_analisa_kimia(Request $request)
@@ -141,15 +142,15 @@ class OperatorController extends Controller
             'tanggal_terima' => 'required',
             'tanggal_uji' => 'required',
             'tanggal_selesai' => 'required',
-        ],[
-           'nodokumen.unique' => 'no dokumen ini telah ada!',
-           'nodokumen.required' => 'no dokumen ini harus di isi!',
-           'pemberi_sampel.required' => 'Kolom pemberi_sampel harus di isi',
-        //    'parameter_pengujian.required' => 'Kolom parameter_pengujian harus di isi',
-           'jumlah_sampel.required' => 'Kolom jumlah_sampel harus di isi',
-           'tanggal_terima.required' => 'Kolom tanggal_terima harus di isi',
-           'tanggal_uji.required' => 'Kolom tanggal_uji harus di isi',
-           'tanggal_selesai.required' => 'Kolom tanggal_selesai harus di isi',
+        ], [
+            'nodokumen.unique' => 'no dokumen ini telah ada!',
+            'nodokumen.required' => 'no dokumen ini harus di isi!',
+            'pemberi_sampel.required' => 'Kolom pemberi_sampel harus di isi',
+            //    'parameter_pengujian.required' => 'Kolom parameter_pengujian harus di isi',
+            'jumlah_sampel.required' => 'Kolom jumlah_sampel harus di isi',
+            'tanggal_terima.required' => 'Kolom tanggal_terima harus di isi',
+            'tanggal_uji.required' => 'Kolom tanggal_uji harus di isi',
+            'tanggal_selesai.required' => 'Kolom tanggal_selesai harus di isi',
         ]);
         // $get_now = Carbon::now()->translatedFormat('d-m-y h:i:s');
         $get_tahun = Carbon::now()->translatedFormat('y');
@@ -164,13 +165,22 @@ class OperatorController extends Controller
 
             // Declare a lookup array that we will use to traverse the number:
             $lookup = array(
-                'M' => 1000, 'CM' => 900, 'D' => 500, 'CD' => 400,
-                'C' => 100, 'XC' => 90, 'L' => 50, 'XL' => 40,
-                'X' => 10, 'IX' => 9, 'V' => 5, 'IV' => 4, 'I' => 1
+                'M' => 1000,
+                'CM' => 900,
+                'D' => 500,
+                'CD' => 400,
+                'C' => 100,
+                'XC' => 90,
+                'L' => 50,
+                'XL' => 40,
+                'X' => 10,
+                'IX' => 9,
+                'V' => 5,
+                'IV' => 4,
+                'I' => 1
             );
 
-            foreach ($lookup as $roman => $value)
-            {
+            foreach ($lookup as $roman => $value) {
                 // Look for number of matches
                 $matches = intval($n / $value);
 
@@ -192,15 +202,15 @@ class OperatorController extends Controller
         //     $get_last_no_dokumen = Futami::latest()->first()->nodokumen;
         // }
 
-        if(is_null($get_last_no_dokumen) || $get_last_no_dokumen->created_at->format('y') !== $get_tahun) {
+        if (is_null($get_last_no_dokumen) || $get_last_no_dokumen->created_at->format('y') !== $get_tahun) {
             $get_last_no_dokumen = 0;
         } else {
             $get_last_no_dokumen = $get_last_no_dokumen->nodokumen;
         }
 
 
-        $nodokumen_get_num = explode("/", $get_last_no_dokumen)[0]+1; //membagi angka dengan axplode
-        $nodokumen = $nodokumen_get_num."/LAK/".numberToRoman($get_bulan)."/".$get_tahun;
+        $nodokumen_get_num = explode("/", $get_last_no_dokumen)[0] + 1; //membagi angka dengan axplode
+        $nodokumen = $nodokumen_get_num . "/LAK/" . numberToRoman($get_bulan) . "/" . $get_tahun;
 
         // dd($nodokumen);
 
@@ -237,7 +247,7 @@ class OperatorController extends Controller
             'delete' => 0,
         ]);
 
-        return redirect('/operator/sampelanalisakimia/' .$validasiCreate->id)->with('successAdd', 'Berhasil membuat Dokumen Baru!'); //mereturn / lewat / , bukan lewat name yang diberikan
+        return redirect('/operator/sampelanalisakimia/' . $validasiCreate->id)->with('successAdd', 'Berhasil membuat Dokumen Baru!'); //mereturn / lewat / , bukan lewat name yang diberikan
 
     }
 
@@ -262,7 +272,7 @@ class OperatorController extends Controller
             // 'inputSampel.*.parameter_nilaiuji_c4' => 'required',
             // 'inputSampel.*.spesifikasi' => 'required|min:5',
             // 'inputSampel.*.keterangan' => 'required|min:5',
-        ],[
+        ], [
             'inputSampel.required' => 'Kolom sampel harus di isi',
             'inputSampel.array' => 'Kolom sampel harus berupa array',
             'inputSampel.min' => 'Minimal satu sampel harus diisi',
@@ -279,7 +289,7 @@ class OperatorController extends Controller
             // 'inputSampel.*.keterangan.min' => 'Kolom keterangan harus memiliki panjang minimal 5 karakter',
         ]);
 
-        foreach($request->inputSampel as $key => $value){
+        foreach ($request->inputSampel as $key => $value) {
             DB::table('futami_sampel_kimias')->insert([
                 'sampel' => $value['sampel'],
                 'parameter_nilaiuji' => $value['parameter_nilaiuji'],
@@ -313,7 +323,7 @@ class OperatorController extends Controller
             'tanggal_terima' => 'required',
             'tanggal_uji' => 'required',
             'tanggal_selesai' => 'required',
-        ],[
+        ], [
             // 'nodokumen.required' => 'no dokumen ini harus di isi!',
             'pemberi_sampel.required' => 'Kolom pemberi_sampel harus di isi',
             // 'parameter_pengujian.required' => 'Kolom parameter_pengujian harus di isi',
@@ -344,7 +354,7 @@ class OperatorController extends Controller
             // 'inputSampel.*.parameter_nilaiuji_c4' => 'required',
             // 'inputSampel.*.spesifikasi' => 'required|min:5',
             // 'inputSampel.*.keterangan' => 'required|min:5',
-        ],[
+        ], [
             'inputSampel.*.sampel.required' => 'Kolom sampel harus di isi',
             // 'inputSampel.*.parameter_nilaiuji.required' => 'Kolom parameter_nilaiuji harus di isi',
             // 'inputSampel.*.parameter_nilaiuji_c2.required' => 'Kolom parameter_nilaiuji harus di isi',
@@ -370,7 +380,7 @@ class OperatorController extends Controller
         Futami::find($id)->futami_sampel_kimia()->saveMany($sampel_data);
 
 
-        return redirect('/operator/data')->with('successUpdate','Berhasil mengupdate data Dokumen!');
+        return redirect('/operator/data')->with('successUpdate', 'Berhasil mengupdate data Dokumen!');
     }
 
 
@@ -388,7 +398,6 @@ class OperatorController extends Controller
         Futami_sampel_kimia::where('id', '=', $id)->delete();
         // return redirect()->route('data')->with('successDelete', 'Berhasil menghapus data!');
         return redirect()->back()->with('successDelete', 'Berhasil menghapus data sampel!');
-
     }
 
     public function dataDestroy($id)
@@ -396,7 +405,7 @@ class OperatorController extends Controller
         // Futami::where('id', '=', $id)->delete();
         // Futami_sampel_kimia::where('id_analisa_kimia', '=', $id)->delete();
 
-        Futami::where('id',$id)->update([
+        Futami::where('id', $id)->update([
             'delete' => 1,
         ]);
         // Futami_sampel_kimia::where('id_analisa_kimia', '=', $id)->update();
@@ -433,16 +442,16 @@ class OperatorController extends Controller
         return view('operator.history', compact('futamis'))->with('no', ($futamis->currentPage() - 1) * $futamis->perPage() + 1);
     }
 
-     public function dataEdit($id)
-     {
-         //menampilkan form edit data
-         //ambil data dari db yang idnya sama dengan id yang dikirim dari routenya
-         $futamis = Futami::Where('id', $id)->first();
-         $futami_sampel_kimia = Futami_sampel_kimia::where('id', '=', $id)->first();
+    public function dataEdit($id)
+    {
+        //menampilkan form edit data
+        //ambil data dari db yang idnya sama dengan id yang dikirim dari routenya
+        $futamis = Futami::Where('id', $id)->first();
+        $futami_sampel_kimia = Futami_sampel_kimia::where('id', '=', $id)->first();
 
-         // lalu tampilkan halaman dari view edit dengan mengirim data yang ada di variable todo
-         return view('operator.editData', compact('futamis', 'futami_sampel_kimia'));
-     }
+        // lalu tampilkan halaman dari view edit dengan mengirim data yang ada di variable todo
+        return view('operator.editData', compact('futamis', 'futami_sampel_kimia'));
+    }
 
     //  public function dataUpdate(Request $request, $id)
     //  {
@@ -483,12 +492,12 @@ class OperatorController extends Controller
     //      return redirect()->route('data')->with('successUpdate','Berhasil mengupdate data!');
     //  }
 
-     public function operatorttd(Request $request, $id)
-     {
+    public function operatorttd(Request $request, $id)
+    {
         $request->validate([
             'ttd_operator' => 'required',
-        ],[
-           'ttd_operator' => 'Kolom TTD Operator harus di isi!',
+        ], [
+            'ttd_operator' => 'Kolom TTD Operator harus di isi!',
         ]);
 
         $futamis = Futami::all();
@@ -496,13 +505,13 @@ class OperatorController extends Controller
             'statusOP' => 1,
             'user_id_OP' => auth::user()->id,
             'name_id_OP' => auth::user()->nama,
-           //  'created_at_OP' => Carbon::now()->format('Y M D'),
+            //  'created_at_OP' => Carbon::now()->format('Y M D'),
             'created_at_OP' => $request->input('ttd_operator'),
         ]);
         // dd($ttdOperator);
 
         //kalau berhasil akan diarahkan ke halaman list todo yang complated dengan pemberitahuan
-         return redirect()->route('data')->with('operatorttd', 'Data telah ditandatangani oleh Operator!');
+        return redirect()->route('data')->with('operatorttd', 'Data telah ditandatangani oleh Operator!');
         // return view('operator.data', compact('futamis'))->with('no');
     }
 
@@ -514,7 +523,7 @@ class OperatorController extends Controller
 
 
         $pdf = PDF::setOptions(['defaultFont' => 'sans-serif', 'isHtml5ParserEnabled' => true, 'isRemoteEnabled' => true]);
-        $pdf = PDF::loadView('pdf.analisa_kimia_pdf', array('futami' => $futami, 'futami_sampel_kimia'=>$futami_sampel_kimia))->setPaper('a5', 'landscape')->setOptions(['defaultFont' => 'sans-serif']);
+        $pdf = PDF::loadView('pdf.analisa_kimia_pdf', array('futami' => $futami, 'futami_sampel_kimia' => $futami_sampel_kimia))->setPaper('a5', 'landscape')->setOptions(['defaultFont' => 'sans-serif']);
         // return $pdf->stream();
         $filename = 'Laporan Analisa Kimia ' . $futami->nodokumen . '.pdf';
         return $pdf->stream($filename);
@@ -538,16 +547,26 @@ class OperatorController extends Controller
 
     public function operator_analisakimia_exportExcel($id)
     {
-        // Mengatur batas waktu eksekusi menjadi 300 detik (5 menit)
-        // set_time_limit(300);
 
         $futami = Futami::where('id', $id)->first();
 
         $nodokumen = explode('/', $futami->nodokumen);
         $dokumen = implode('_', $nodokumen);
 
+        $filename = $dokumen . '.xlsx';
+        $path = storage_path('app/public/exports/' . $filename);
 
-        return Excel::download(new AnalisaKimiaExport($id), ''.$dokumen.'.xlsx');
+        // Simpan file ke server
+        Excel::store(new AnalisaKimiaExport($id), 'public/exports/' . $filename);
+
+        // Simpan data ke database
+        ExportedFileKimia::create([
+            'filename' => $filename,
+            'path' => '/storage/exports/' . $filename,
+            'type' => 'Data Analisa Kimia',
+        ]);
+
+        // Download file ke pengguna
+        return response()->download($path);
     }
-
 }

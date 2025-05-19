@@ -28,20 +28,25 @@ class MikrobiologiAlatMesinController extends Controller
     // Operator Function
     public function mikrobiologi_alat_mesin(Request $request)
     {
-        // $mikrobiologi_alat_mesin = Mikrobiologi_alat_mesin::where('delete', 0)->get();
+        $currentYear = date('Y');
+        $query = Mikrobiologi_alat_mesin::where('delete', 0);
 
-        $mikrobiologi_alat_mesin = Mikrobiologi_alat_mesin::where('delete', 0);
+        // Filter tahun pakai tahun berjalan (fixed)
+        $query->whereYear('tgl_inokulasi', $currentYear);
 
-        if ($request->has('tgl_inokulasi') && $request->has('tgl_pengamatan')) {
-            $tgl_inokulasi = Carbon::parse($request->tgl_inokulasi)->toDateTimeString();
-            $tgl_pengamatan = Carbon::parse($request->tgl_pengamatan)->toDateTimeString();
-            $mikrobiologi_alat_mesin->whereBetween('tgl_inokulasi', [$tgl_inokulasi, $tgl_pengamatan]);
+        // Filter bulan jika ada request bulan
+        if ($request->filled('month')) {
+            $month = $request->month;
+            $query->whereMonth('tgl_inokulasi', $month);
         }
 
-        $mikrobiologi_alat_mesin = $mikrobiologi_alat_mesin->orderBy('id', 'asc')->paginate(10)->onEachSide(10)->appends(request()->except('page')); //asc dari awal ke akhir
-        return view('mikrobiologi_alat_mesin.operator.mikrobiologi_alat_mesin', compact('mikrobiologi_alat_mesin'))->with('no', ($mikrobiologi_alat_mesin->currentPage() - 1) * $mikrobiologi_alat_mesin->perPage() + 1);
+        $mikrobiologi_alat_mesin = $query->orderBy('id', 'asc')
+            ->paginate(10)
+            ->onEachSide(10)
+            ->appends($request->except('page'));
 
-        // return view('mikrobiologi_alat_mesin.operator.mikrobiologi_alat_mesin', compact('mikrobiologi_alat_mesin'))->with('no');
+        return view('mikrobiologi_alat_mesin.operator.mikrobiologi_alat_mesin', compact('mikrobiologi_alat_mesin'))
+            ->with('no', ($mikrobiologi_alat_mesin->currentPage() - 1) * $mikrobiologi_alat_mesin->perPage() + 1);
     }
 
     public function add_mikrobiologi_alat_mesin(Request $request)
@@ -55,7 +60,7 @@ class MikrobiologiAlatMesinController extends Controller
             'nama_produk' => 'required|min:3',
             'tgl_inokulasi' => 'required',
             'tgl_pengamatan' => 'required',
-        ],[
+        ], [
             'nama_produk.required' => 'Kolom nama produk harus di isi',
             'tgl_inokulasi.required' => 'Kolom tanggal inokulasi harus di isi',
             'tgl_pengamatan.required' => 'Kolom tanggal pengamatan harus di isi',
@@ -74,13 +79,22 @@ class MikrobiologiAlatMesinController extends Controller
 
             // Declare a lookup array that we will use to traverse the number:
             $lookup = array(
-                'M' => 1000, 'CM' => 900, 'D' => 500, 'CD' => 400,
-                'C' => 100, 'XC' => 90, 'L' => 50, 'XL' => 40,
-                'X' => 10, 'IX' => 9, 'V' => 5, 'IV' => 4, 'I' => 1
+                'M' => 1000,
+                'CM' => 900,
+                'D' => 500,
+                'CD' => 400,
+                'C' => 100,
+                'XC' => 90,
+                'L' => 50,
+                'XL' => 40,
+                'X' => 10,
+                'IX' => 9,
+                'V' => 5,
+                'IV' => 4,
+                'I' => 1
             );
 
-            foreach ($lookup as $roman => $value)
-            {
+            foreach ($lookup as $roman => $value) {
                 // Look for number of matches
                 $matches = intval($n / $value);
 
@@ -102,14 +116,14 @@ class MikrobiologiAlatMesinController extends Controller
         //     $nodokumen_get_num = (int)explode("/", $get_last_no_dokumen->nodokumen)[0] + 1;
         // }
 
-        if(is_null($get_last_no_dokumen) || $get_last_no_dokumen->created_at->format('y') !== $get_tahun) {
+        if (is_null($get_last_no_dokumen) || $get_last_no_dokumen->created_at->format('y') !== $get_tahun) {
             $get_last_no_dokumen = 0;
         } else {
             $get_last_no_dokumen = $get_last_no_dokumen->nodokumen;
         }
 
-        $nodokumen_get_num = explode("/", $get_last_no_dokumen)[0]+1; //membagi angka dengan axplode
-        $nodokumen = $nodokumen_get_num."/LAMS-A/".numberToRoman($get_bulan)."/".$get_tahun;
+        $nodokumen_get_num = explode("/", $get_last_no_dokumen)[0] + 1; //membagi angka dengan axplode
+        $nodokumen = $nodokumen_get_num . "/LAMS-A/" . numberToRoman($get_bulan) . "/" . $get_tahun;
 
 
         // dd($nodokumen);
@@ -140,7 +154,7 @@ class MikrobiologiAlatMesinController extends Controller
         ]);
 
         // dd($mikrobiologiProdukPercobaan);
-        return redirect('/operator/sampel_mikrobiologi_alat_mesin/' .$mikrobiologi_alat_mesin->id)->with('successAdd', 'Berhasil membuat Dokumen Baru!'); //mereturn / lewat / , bukan lewat name yang diberikan
+        return redirect('/operator/sampel_mikrobiologi_alat_mesin/' . $mikrobiologi_alat_mesin->id)->with('successAdd', 'Berhasil membuat Dokumen Baru!'); //mereturn / lewat / , bukan lewat name yang diberikan
     }
 
     public function sampel_mikrobiologi_alat_mesin(Request $request, $id)
@@ -162,7 +176,7 @@ class MikrobiologiAlatMesinController extends Controller
             'inputSampel.*.yeast_mold' => 'required',
             'inputSampel.*.coliform' => 'required',
             // 'inputSampel.*.keterangan' => 'required|min:5',
-        ],[
+        ], [
             'inputSampel.required' => 'Kolom Kode Sampling harus di isi',
             'inputSampel.array' => 'Kolom Kode Sampling harus berupa array',
             'inputSampel.min' => 'Minimal satu Kode Sampling harus diisi',
@@ -176,7 +190,7 @@ class MikrobiologiAlatMesinController extends Controller
             // 'inputSampel.*.keterangan.min' => 'Kolom keterangan harus memiliki panjang minimal 5 karakter',
         ]);
 
-        foreach($request->inputSampel as $key => $value){
+        foreach ($request->inputSampel as $key => $value) {
             DB::table('sampel_mikrobiologi_alat_mesins')->insert([
                 'nama_objek' => $value['nama_objek'],
                 'jam_sampling' => $value['jam_sampling'],
@@ -195,8 +209,8 @@ class MikrobiologiAlatMesinController extends Controller
     {
         $request->validate([
             'ttd_operator' => 'required',
-        ],[
-           'ttd_operator' => 'Kolom TTD harus di isi!',
+        ], [
+            'ttd_operator' => 'Kolom TTD harus di isi!',
         ]);
         // $mikrobiologis = Mikrobiologi_produk::all();
         Mikrobiologi_alat_mesin::where('id', $id)->update([
@@ -208,7 +222,7 @@ class MikrobiologiAlatMesinController extends Controller
         ]);
 
         return redirect()->route('mikrobiologi_alat_mesin')->with('operatorttd', 'Data telah ditandatangani oleh Operator!');
-   }
+    }
 
     public function mikrobiologi_alat_mesin_Destroy($id)
     {
@@ -230,7 +244,6 @@ class MikrobiologiAlatMesinController extends Controller
         $mikrobiologi_alat_mesin = $mikrobiologi_alat_mesin->orderBy('id', 'asc')->get(); //asc dari awal ke akhir
 
         return view('mikrobiologi_alat_mesin.operator.history', compact('mikrobiologi_alat_mesin'))->with('no');
-
     }
 
     public function mikrobiologi_alat_mesin_restore($id)
@@ -280,7 +293,7 @@ class MikrobiologiAlatMesinController extends Controller
             'nama_produk' => 'required',
             'tgl_inokulasi' => 'required',
             'tgl_pengamatan' => 'required',
-        ],[
+        ], [
             'nama_produk.required' => 'Kolom nama produk harus di isi',
             'tgl_inokulasi.required' => 'Kolom tanggal inokulasi harus di isi',
             'tgl_pengamatan.required' => 'Kolom tanggal pengamatan harus di isi',
@@ -302,7 +315,7 @@ class MikrobiologiAlatMesinController extends Controller
             'inputSampel.*.tpc' => 'required',
             'inputSampel.*.yeast_mold' => 'required',
             'inputSampel.*.coliform' => 'required',
-        ],[
+        ], [
             'inputSampel.*.nama_objek.required' => 'Kolom Nama Objek harus di isi',
             'inputSampel.*.jam_sampling.required' => 'Kolom Jam Sampling harus di isi',
             'inputSampel.*.tpc.required' => 'Kolom TPC harus di isi',
@@ -328,7 +341,7 @@ class MikrobiologiAlatMesinController extends Controller
         Mikrobiologi_alat_mesin::find($id)->Sampel_mikrobiologi_alat_mesin()->delete();
         Mikrobiologi_alat_mesin::find($id)->Sampel_mikrobiologi_alat_mesin()->saveMany($sampel_data);
 
-        return redirect('/operator/mikrobiologi_alat_mesin')->with('successUpdate','Berhasil mengupdate data Dokumen!');
+        return redirect('/operator/mikrobiologi_alat_mesin')->with('successUpdate', 'Berhasil mengupdate data Dokumen!');
     }
 
     public function OP_mikrobiologi_alat_mesin_pdf($id)
@@ -337,7 +350,7 @@ class MikrobiologiAlatMesinController extends Controller
         $mikrobiologi_alat_mesin = Mikrobiologi_alat_mesin::where('id', $id)->first();
 
         $pdf = PDF::setOptions(['defaultFont' => 'sans-serif', 'isHtml5ParserEnabled' => true, 'isRemoteEnabled' => true]);
-        $pdf = PDF::loadView('pdf.mikrobiologi_alat_mesin_pdf', array('mikrobiologi_alat_mesin' => $mikrobiologi_alat_mesin, 'sampel_mikrobiologi_alat_mesin'=>$sampel_mikrobiologi_alat_mesin))->setOptions(['defaultFont' => 'sans-serif']);
+        $pdf = PDF::loadView('pdf.mikrobiologi_alat_mesin_pdf', array('mikrobiologi_alat_mesin' => $mikrobiologi_alat_mesin, 'sampel_mikrobiologi_alat_mesin' => $sampel_mikrobiologi_alat_mesin))->setOptions(['defaultFont' => 'sans-serif']);
         // $pdf = PDF::loadView('pdf.mikrobiologi_air_pdf', array('mikrobiologi_airs' => $mikrobiologi_airs, 'sampel_mikrobiologi_airs'=>$sampel_mikrobiologi_airs))->setPaper('a5', 'landscape')->setOptions(['defaultFont' => 'sans-serif']);
         // return $pdf->stream();
         $filename = 'Laporan Analisa Mikrobiologi Alat Dan Mesin ' . $mikrobiologi_alat_mesin->nodokumen . '.pdf';
@@ -417,8 +430,8 @@ class MikrobiologiAlatMesinController extends Controller
     {
         $request->validate([
             'ttd_staff' => 'required',
-        ],[
-           'ttd_staff' => 'Kolom TTD harus di isi!',
+        ], [
+            'ttd_staff' => 'Kolom TTD harus di isi!',
         ]);
         Mikrobiologi_alat_mesin::where('id', $id)->update([
             'statusST' => 1,
@@ -447,7 +460,7 @@ class MikrobiologiAlatMesinController extends Controller
         $mikrobiologi_alat_mesin = Mikrobiologi_alat_mesin::where('id', $id)->first();
 
         $pdf = PDF::setOptions(['defaultFont' => 'sans-serif', 'isHtml5ParserEnabled' => true, 'isRemoteEnabled' => true]);
-        $pdf = PDF::loadView('pdf.mikrobiologi_alat_mesin_pdf', array('mikrobiologi_alat_mesin' => $mikrobiologi_alat_mesin, 'sampel_mikrobiologi_alat_mesin'=>$sampel_mikrobiologi_alat_mesin))->setOptions(['defaultFont' => 'sans-serif']);
+        $pdf = PDF::loadView('pdf.mikrobiologi_alat_mesin_pdf', array('mikrobiologi_alat_mesin' => $mikrobiologi_alat_mesin, 'sampel_mikrobiologi_alat_mesin' => $sampel_mikrobiologi_alat_mesin))->setOptions(['defaultFont' => 'sans-serif']);
         // $pdf = PDF::loadView('pdf.mikrobiologi_air_pdf', array('mikrobiologi_airs' => $mikrobiologi_airs, 'sampel_mikrobiologi_airs'=>$sampel_mikrobiologi_airs))->setPaper('a5', 'landscape')->setOptions(['defaultFont' => 'sans-serif']);
         // return $pdf->stream();
         $filename = 'Laporan Analisa Mikrobiologi Alat Dan Mesin ' . $mikrobiologi_alat_mesin->nodokumen . '.pdf';
@@ -464,7 +477,7 @@ class MikrobiologiAlatMesinController extends Controller
 
 
 
-     ////Function Supervisor
+    ////Function Supervisor
     public function supervisor_mikrobiologi_alat_mesin(Request $request)
     {
         // $mikrobiologi_airs = Mikrobiologi_produk::all();
@@ -485,8 +498,8 @@ class MikrobiologiAlatMesinController extends Controller
     {
         $request->validate([
             'ttd_supervisor' => 'required',
-        ],[
-           'ttd_supervisor' => 'Kolom TTD harus di isi!',
+        ], [
+            'ttd_supervisor' => 'Kolom TTD harus di isi!',
         ]);
         Mikrobiologi_alat_mesin::where('id', $id)->update([
             'statusSP' => 1,
@@ -505,7 +518,7 @@ class MikrobiologiAlatMesinController extends Controller
         $mikrobiologi_alat_mesin = Mikrobiologi_alat_mesin::where('id', $id)->first();
 
         $pdf = PDF::setOptions(['defaultFont' => 'sans-serif', 'isHtml5ParserEnabled' => true, 'isRemoteEnabled' => true]);
-        $pdf = PDF::loadView('pdf.mikrobiologi_alat_mesin_pdf', array('mikrobiologi_alat_mesin' => $mikrobiologi_alat_mesin, 'sampel_mikrobiologi_alat_mesin'=>$sampel_mikrobiologi_alat_mesin))->setOptions(['defaultFont' => 'sans-serif']);
+        $pdf = PDF::loadView('pdf.mikrobiologi_alat_mesin_pdf', array('mikrobiologi_alat_mesin' => $mikrobiologi_alat_mesin, 'sampel_mikrobiologi_alat_mesin' => $sampel_mikrobiologi_alat_mesin))->setOptions(['defaultFont' => 'sans-serif']);
         // $pdf = PDF::loadView('pdf.mikrobiologi_air_pdf', array('mikrobiologi_airs' => $mikrobiologi_airs, 'sampel_mikrobiologi_airs'=>$sampel_mikrobiologi_airs))->setPaper('a5', 'landscape')->setOptions(['defaultFont' => 'sans-serif']);
         // return $pdf->stream();
         $filename = 'Laporan Analisa Mikrobiologi Alat Dan Mesin ' . $mikrobiologi_alat_mesin->nodokumen . '.pdf';
@@ -574,7 +587,7 @@ class MikrobiologiAlatMesinController extends Controller
         $mikrobiologi_alat_mesin = Mikrobiologi_alat_mesin::where('id', $id)->first();
 
         $pdf = PDF::setOptions(['defaultFont' => 'sans-serif', 'isHtml5ParserEnabled' => true, 'isRemoteEnabled' => true]);
-        $pdf = PDF::loadView('pdf.mikrobiologi_alat_mesin_pdf', array('mikrobiologi_alat_mesin' => $mikrobiologi_alat_mesin, 'sampel_mikrobiologi_alat_mesin'=>$sampel_mikrobiologi_alat_mesin))->setOptions(['defaultFont' => 'sans-serif']);
+        $pdf = PDF::loadView('pdf.mikrobiologi_alat_mesin_pdf', array('mikrobiologi_alat_mesin' => $mikrobiologi_alat_mesin, 'sampel_mikrobiologi_alat_mesin' => $sampel_mikrobiologi_alat_mesin))->setOptions(['defaultFont' => 'sans-serif']);
         // $pdf = PDF::loadView('pdf.mikrobiologi_air_pdf', array('mikrobiologi_airs' => $mikrobiologi_airs, 'sampel_mikrobiologi_airs'=>$sampel_mikrobiologi_airs))->setPaper('a5', 'landscape')->setOptions(['defaultFont' => 'sans-serif']);
         // return $pdf->stream();
         $filename = 'Laporan Analisa Mikrobiologi Alat Dan Mesin ' . $mikrobiologi_alat_mesin->nodokumen . '.pdf';

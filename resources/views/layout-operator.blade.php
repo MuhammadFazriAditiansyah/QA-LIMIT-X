@@ -838,10 +838,19 @@
                                 </li>
 
                                 <li class="nav-item">
-                                    <a class="nav-link" href="{{ route('exported.files') }}">
-                                        <i class="fas fa-file-excel"></i> Daftar Export
+                                    <a class="nav-link" href="{{ route('exported.files.kimia') }}">
+                                        <i class="fas fa-file-excel"></i> <span>History Export Kimia</span>
                                     </a>
                                 </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="{{ route('exported.files') }}">
+                                        <i class="fas fa-file-excel"></i> <span>History Export Mikrobiologi</span>
+                                    </a>
+                                </li>
+
+
+
+
                         </ul>
                     @elseif (Auth::user()->role_id == 2)
                         <ul class="sidebar-menu mt-5" style="margin-top:3%; ">
@@ -935,8 +944,13 @@
                                 </li>
 
                                 <li class="nav-item">
+                                    <a class="nav-link" href="{{ route('exported.files.kimia') }}">
+                                        <i class="fas fa-file-excel"></i> <span>History Export Kimia</span>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
                                     <a class="nav-link" href="{{ route('exported.files') }}">
-                                        <i class="fas fa-file-excel"></i> Daftar Export
+                                        <i class="fas fa-file-excel"></i> <span>History Export Mikrobiologi</span>
                                     </a>
                                 </li>
                         </ul>

@@ -18,6 +18,7 @@ use Illuminate\Support\Facades\DB;
 use RealRashid\SweetAlert\Facades\Alert;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\MikrobiologiKimiaSensoriExport;
+use App\Models\ExportedFileKimia;
 
 
 class MikrobiologiKimiaSensoriController extends Controller
@@ -434,13 +435,26 @@ class MikrobiologiKimiaSensoriController extends Controller
     }
     public function mikrobiologi_kimia_sensori_exportExcel($id)
     {
-        // set_time_limit(300);
 
         $mikrobiologi_kimia_sensori = Mikrobiologi_kimia_sensori::where('id', $id)->first();
         $nodokumen = explode('/', $mikrobiologi_kimia_sensori->nodokumen);
         $dokumen = implode('_', $nodokumen);
 
-        return Excel::download(new MikrobiologiKimiaSensoriExport($id), ''.$dokumen.'.xlsx');
+        $filename = $dokumen . '.xlsx';
+        $path = storage_path('app/public/exports/' . $filename);
+
+        // Simpan file ke server
+        Excel::store(new MikrobiologiKimiaSensoriExport($id), 'public/exports/' . $filename);
+
+        // Simpan data ke database
+        ExportedFileKimia::create([
+            'filename' => $filename,
+            'path' => '/storage/exports/' . $filename,
+            'type' => 'Kimia Sensori',
+        ]);
+
+        // Download file ke pengguna
+        return response()->download($path);
     }
 
 

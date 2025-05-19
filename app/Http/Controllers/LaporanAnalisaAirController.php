@@ -20,6 +20,7 @@ use Illuminate\Support\Facades\DB;
 use RealRashid\SweetAlert\Facades\Alert;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\LaporanAnalisaAirExport;
+use App\Models\ExportedFileKimia;
 
 
 class LaporanAnalisaAirController extends Controller
@@ -452,7 +453,21 @@ class LaporanAnalisaAirController extends Controller
         $nodokumen = explode('/', $laporan_analisa_air->nodokumen);
         $dokumen = implode('_', $nodokumen);
 
-        return Excel::download(new LaporanAnalisaAirExport($id), ''.$dokumen.'.xlsx');
+        $filename = $dokumen . '.xlsx';
+        $path = storage_path('app/public/exports/' . $filename);
+
+        // Simpan file ke server
+        Excel::store(new LaporanAnalisaAirExport($id), 'public/exports/' . $filename);
+
+        // Simpan data ke database
+        ExportedFileKimia::create([
+            'filename' => $filename,
+            'path' => '/storage/exports/' . $filename,
+            'type' => 'Laporan Analisa Air',
+        ]);
+
+        // Download file ke pengguna
+        return response()->download($path);
     }
 
 
@@ -525,7 +540,7 @@ class LaporanAnalisaAirController extends Controller
         $sampel_null = Sampel_laporan_analisa_air::where('id_dokumen', null)->get();
         // dd($sampel_null);
 
-        $pdf = PDF::setOptions(['defaultFont' => 'sans-serif', 'isHtml5ParserEnabled' => true, 'isRemoteEnabled' => true]);
+        $pdf = PDF ::setOptions(['defaultFont' => 'sans-serif', 'isHtml5ParserEnabled' => true, 'isRemoteEnabled' => true]);
         $pdf = PDF::loadView('pdf.laporan_analisa_air_pdf', array('laporan_analisa_air' => $laporan_analisa_air, 'sampel_laporan_analisa_air' => $sampel_laporan_analisa_air, 'pengujian_laporan_analisa_air'=>$pengujian_laporan_analisa_air, 'sampel_null'=>$sampel_null, 'no'=>$no))->setOptions(['defaultFont' => 'sans-serif']);
 
         // return $pdf->stream();

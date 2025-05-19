@@ -30,21 +30,37 @@ class MikrobiologiProdukController extends Controller
      * @return \Illuminate\Http\Response
      */
 
-    public function mikrobiologi_produk(Request $request)
-    {
-        // $mikrobiologi_produk = Mikrobiologi_produk::all();
-        $mikrobiologi_produk = Mikrobiologi_produk::where('delete', 0);
+   public function mikrobiologi_produk(Request $request)
+{
+    $mikrobiologi_produk = Mikrobiologi_produk::where('delete', 0);
 
-        if ($request->has('tgl_mulai') && $request->has('tgl_selesai')) {
-            $tgl_mulai = Carbon::parse($request->tgl_mulai)->toDateTimeString();
-            $tgl_selesai = Carbon::parse($request->tgl_selesai)->toDateTimeString();
-            $mikrobiologi_produk->whereBetween($request->pencarian, [$tgl_mulai, $tgl_selesai]);
-        }
+    // Tahun sekarang sebagai default
+    $tahunSekarang = now()->year;
+    $tahunDipilih = $request->get('year', $tahunSekarang);
 
-        $mikrobiologi_produk = $mikrobiologi_produk->orderBy('id', 'asc')->paginate(10)->onEachSide(10)->appends(request()->except('page')); //asc dari awal ke akhir
-        return view('mikrobiologi_produk.operator.mikrobiologi_produk', compact('mikrobiologi_produk'))->with('no', ($mikrobiologi_produk->currentPage() - 1) * $mikrobiologi_produk->perPage() + 1);
-        // return view('mikrobiologi_produk.operator.mikrobiologi_produk', compact('mikrobiologi_produk'))->with('no');
+    $mikrobiologi_produk->whereYear('tgl_inokulasi', $tahunDipilih);
+
+    // Filter bulan jika dipilih
+    if ($request->filled('month')) {
+        $mikrobiologi_produk->whereMonth('tgl_inokulasi', $request->month);
     }
+
+    // Ambil daftar tahun unik dari data
+    $years = Mikrobiologi_produk::selectRaw('YEAR(tgl_inokulasi) as year')
+        ->where('delete', 0)
+        ->distinct()
+        ->orderBy('year', 'desc')
+        ->pluck('year');
+
+    $mikrobiologi_produk = $mikrobiologi_produk
+        ->orderBy('id', 'asc')
+        ->paginate(10)
+        ->onEachSide(10)
+        ->appends(request()->except('page'));
+
+    return view('mikrobiologi_produk.operator.mikrobiologi_produk', compact('mikrobiologi_produk', 'years'))
+        ->with('no', ($mikrobiologi_produk->currentPage() - 1) * $mikrobiologi_produk->perPage() + 1);
+}
 
     public function add_mikrobiologi_produk(Request $request)
     {

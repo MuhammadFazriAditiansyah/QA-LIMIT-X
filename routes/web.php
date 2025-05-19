@@ -20,11 +20,9 @@ use App\Http\Controllers\MikrobiologiPersonilController;
 use App\Http\Controllers\MikrobiologiAlatMesinController;
 use App\Http\Controllers\MikrobiologiKimiaSensoriController;
 use App\Http\Controllers\LaporanAnalisaAirController;
-use App\Models\ExportedFile;
 use App\Http\Controllers\ExportedFileController;
-
-
-
+use App\Http\Controllers\ExportedFileKimiaController;
+use App\Models\ExportedFileKimia;
 
 /*
 |--------------------------------------------------------------------------
@@ -48,7 +46,7 @@ Route::middleware('Guest')->group(function () {
     Route::post('/login', [LoginController::class, 'auth'])->name('login.auth');
 
     // Halaman Register
-    Route::get('/register', [LoginController::class, 'register'])->name('register'); 
+    Route::get('/register', [LoginController::class, 'register'])->name('register');
     Route::post('/register', [LoginController::class, 'inputRegister'])->name('register.post');
 });
 Route::get('/', [LoginController::class, 'lending'])->name('lending');
@@ -235,8 +233,11 @@ Route::middleware(['isLogin', 'cekRole:operator'])->group(function () {
 });
 
 Route::middleware(['isLogin', 'cekRole:operator,staff'])->group(function () {
-    Route::get('/exported-files', [ExportedFileController::class, 'index'])->name('exported.files');
-    Route::post('/exported-files/download', [ExportedFileController::class, 'downloadMultipleAndExportExcel'])->name('exported.files.download');
+    Route::get('/exported-files-mikrobilogi', [ExportedFileController::class, 'index'])->name('exported.files');
+    Route::post('/exported-files/download/mikrobiologi', [ExportedFileController::class, 'downloadMultipleAndExportExcel'])->name('exported.files.download');
+    Route::get('/exported-files-kimia', [ExportedFileKimiaController::class, 'show'])->name('exported.files.kimia');
+    Route::post('/exported-files/download/kimia', [ExportedFilekimiaController::class, 'downloadMultiple'])->name('exported.files.kimia.download');
+    Route::delete('/exported-files-kimia/delete{id}', [ExportedFileKimiaController::class, 'deleteExportedFileKimia'])->name('exported.files.kimia.delete');
 });
 
 Route::middleware(['isLogin', 'cekRole:staff'])->group(function () {

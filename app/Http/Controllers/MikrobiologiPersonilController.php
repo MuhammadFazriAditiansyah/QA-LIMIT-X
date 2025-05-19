@@ -26,29 +26,31 @@ class MikrobiologiPersonilController extends Controller
      * @return \Illuminate\Http\Response
      */
 
-     // Operator Function
+    // Operator Function
     public function mikrobiologi_personil(Request $request)
     {
-        // $mikrobiologi_personil = Mikrobiologi_personil::where('delete', 0)->get();
-
         $mikrobiologi_personil = Mikrobiologi_personil::where('delete', 0);
 
-        // if ($request->has('tgl_inokulasi') && $request->has('tgl_pengamatan')) {
-        //     $tgl_inokulasi = Carbon::parse($request->tgl_inokulasi)->toDateTimeString();
-        //     $tgl_pengamatan = Carbon::parse($request->tgl_pengamatan)->toDateTimeString();
-        //     $mikrobiologi_personil->whereBetween('tgl_inokulasi', [$tgl_inokulasi, $tgl_pengamatan]);
-        // }
-        if ($request->has('tgl_mulai') && $request->has('tgl_selesai')) {
-            $tgl_mulai = Carbon::parse($request->tgl_mulai)->toDateTimeString();
-            $tgl_selesai = Carbon::parse($request->tgl_selesai)->toDateTimeString();
-            $mikrobiologi_personil->whereBetween('tgl_inokulasi', [$tgl_mulai, $tgl_selesai]);
+        // Filter tahun
+        $year = $request->year ?? date('Y');
+        $mikrobiologi_personil->whereYear('tgl_inokulasi', $year);
+
+        // Filter bulan jika dipilih
+        if ($request->filled('month')) {
+            $mikrobiologi_personil->whereMonth('tgl_inokulasi', $request->month);
         }
 
-        $mikrobiologi_personil = $mikrobiologi_personil->orderBy('id', 'asc')->paginate(10)->onEachSide(10)->appends(request()->except('page')); //asc dari awal ke akhir
-        return view('mikrobiologi_personil.operator.mikrobiologi_personil', compact('mikrobiologi_personil'))->with('no', ($mikrobiologi_personil->currentPage() - 1) * $mikrobiologi_personil->perPage() + 1);
+        // Pagination dan kirim ke view
+        $mikrobiologi_personil = $mikrobiologi_personil->orderBy('id', 'asc')
+            ->paginate(10)
+            ->onEachSide(1)
+            ->appends(request()->except('page'));
 
-        // return view('mikrobiologi_personil.operator.mikrobiologi_personil', compact('mikrobiologi_personil'))->with('no');
+        return view('mikrobiologi_personil.operator.mikrobiologi_personil', compact('mikrobiologi_personil'))
+            ->with('no', ($mikrobiologi_personil->currentPage() - 1) * $mikrobiologi_personil->perPage() + 1);
     }
+
+
 
     public function add_mikrobiologi_personil(Request $request)
     {
@@ -61,7 +63,7 @@ class MikrobiologiPersonilController extends Controller
             'nama_produk' => 'required|min:3',
             'tgl_inokulasi' => 'required',
             'tgl_pengamatan' => 'required',
-        ],[
+        ], [
             'nama_produk.required' => 'Kolom nama produk harus di isi',
             'tgl_inokulasi.required' => 'Kolom tanggal inokulasi harus di isi',
             'tgl_pengamatan.required' => 'Kolom tanggal pengamatan harus di isi',
@@ -80,13 +82,22 @@ class MikrobiologiPersonilController extends Controller
 
             // Declare a lookup array that we will use to traverse the number:
             $lookup = array(
-                'M' => 1000, 'CM' => 900, 'D' => 500, 'CD' => 400,
-                'C' => 100, 'XC' => 90, 'L' => 50, 'XL' => 40,
-                'X' => 10, 'IX' => 9, 'V' => 5, 'IV' => 4, 'I' => 1
+                'M' => 1000,
+                'CM' => 900,
+                'D' => 500,
+                'CD' => 400,
+                'C' => 100,
+                'XC' => 90,
+                'L' => 50,
+                'XL' => 40,
+                'X' => 10,
+                'IX' => 9,
+                'V' => 5,
+                'IV' => 4,
+                'I' => 1
             );
 
-            foreach ($lookup as $roman => $value)
-            {
+            foreach ($lookup as $roman => $value) {
                 // Look for number of matches
                 $matches = intval($n / $value);
 
@@ -108,14 +119,14 @@ class MikrobiologiPersonilController extends Controller
         //     $nodokumen_get_num = (int)explode("/", $get_last_no_dokumen->nodokumen)[0] + 1;
         // }
 
-        if(is_null($get_last_no_dokumen) || $get_last_no_dokumen->created_at->format('y') !== $get_tahun) {
+        if (is_null($get_last_no_dokumen) || $get_last_no_dokumen->created_at->format('y') !== $get_tahun) {
             $get_last_no_dokumen = 0;
         } else {
             $get_last_no_dokumen = $get_last_no_dokumen->nodokumen;
         }
 
-        $nodokumen_get_num = explode("/", $get_last_no_dokumen)[0]+1; //membagi angka dengan axplode
-        $nodokumen = $nodokumen_get_num."/LAMS-P/".numberToRoman($get_bulan)."/".$get_tahun;
+        $nodokumen_get_num = explode("/", $get_last_no_dokumen)[0] + 1; //membagi angka dengan axplode
+        $nodokumen = $nodokumen_get_num . "/LAMS-P/" . numberToRoman($get_bulan) . "/" . $get_tahun;
 
 
         // dd($nodokumen);
@@ -146,7 +157,7 @@ class MikrobiologiPersonilController extends Controller
         ]);
 
         // dd($mikrobiologiProdukPercobaan);
-        return redirect('/operator/sampel_mikrobiologi_personil/' .$mikrobiologi_personil->id)->with('successAdd', 'Berhasil membuat Dokumen Baru!'); //mereturn / lewat / , bukan lewat name yang diberikan
+        return redirect('/operator/sampel_mikrobiologi_personil/' . $mikrobiologi_personil->id)->with('successAdd', 'Berhasil membuat Dokumen Baru!'); //mereturn / lewat / , bukan lewat name yang diberikan
     }
 
     public function sampel_mikrobiologi_personil(Request $request, $id)
@@ -168,7 +179,7 @@ class MikrobiologiPersonilController extends Controller
             'inputSampel.*.yeast_mold' => 'required',
             'inputSampel.*.coliform' => 'required',
             // 'inputSampel.*.keterangan' => 'required|min:5',
-        ],[
+        ], [
             'inputSampel.required' => 'Kolom Kode Sampling harus di isi',
             'inputSampel.array' => 'Kolom Kode Sampling harus berupa array',
             'inputSampel.min' => 'Minimal satu Kode Sampling harus diisi',
@@ -182,7 +193,7 @@ class MikrobiologiPersonilController extends Controller
             // 'inputSampel.*.keterangan.min' => 'Kolom keterangan harus memiliki panjang minimal 5 karakter',
         ]);
 
-        foreach($request->inputSampel as $key => $value){
+        foreach ($request->inputSampel as $key => $value) {
             DB::table('sampel_mikrobiologi_personils')->insert([
                 'nama_objek' => $value['nama_objek'],
                 'jam_sampling' => $value['jam_sampling'],
@@ -201,10 +212,10 @@ class MikrobiologiPersonilController extends Controller
     {
         $request->validate([
             'ttd_operator' => 'required',
-        ],[
-           'ttd_operator' => 'Kolom TTD harus di isi!',
+        ], [
+            'ttd_operator' => 'Kolom TTD harus di isi!',
         ]);
-         // $mikrobiologis = Mikrobiologi_produk::all();
+        // $mikrobiologis = Mikrobiologi_produk::all();
         Mikrobiologi_personil::where('id', $id)->update([
             'statusOP' => 1,
             'user_id_OP' => auth::user()->id,
@@ -214,7 +225,7 @@ class MikrobiologiPersonilController extends Controller
         ]);
 
         return redirect()->route('mikrobiologi_personil')->with('operatorttd', 'Data telah ditandatangani oleh Operator!');
-   }
+    }
 
     public function mikrobiologi_personil_Destroy($id)
     {
@@ -236,7 +247,6 @@ class MikrobiologiPersonilController extends Controller
         $mikrobiologi_personil = $mikrobiologi_personil->orderBy('id', 'asc')->get(); //asc dari awal ke akhir
 
         return view('mikrobiologi_personil.operator.history', compact('mikrobiologi_personil'))->with('no');
-
     }
 
     public function mikrobiologi_personil_restore($id)
@@ -291,7 +301,7 @@ class MikrobiologiPersonilController extends Controller
             'nama_produk' => 'required',
             'tgl_inokulasi' => 'required',
             'tgl_pengamatan' => 'required',
-        ],[
+        ], [
             'nama_produk.required' => 'Kolom nama produk harus di isi',
             'tgl_inokulasi.required' => 'Kolom tanggal inokulasi harus di isi',
             'tgl_pengamatan.required' => 'Kolom tanggal pengamatan harus di isi',
@@ -313,7 +323,7 @@ class MikrobiologiPersonilController extends Controller
             'inputSampel.*.tpc' => 'required',
             'inputSampel.*.yeast_mold' => 'required',
             'inputSampel.*.coliform' => 'required',
-        ],[
+        ], [
             'inputSampel.*.nama_objek.required' => 'Kolom Nama Objek harus di isi',
             'inputSampel.*.jam_sampling.required' => 'Kolom Jam Sampling harus di isi',
             'inputSampel.*.tpc.required' => 'Kolom TPC harus di isi',
@@ -339,7 +349,7 @@ class MikrobiologiPersonilController extends Controller
         Mikrobiologi_personil::find($id)->Sampel_mikrobiologi_personil()->delete();
         Mikrobiologi_personil::find($id)->Sampel_mikrobiologi_personil()->saveMany($sampel_data);
 
-        return redirect('/operator/mikrobiologi_personil')->with('successUpdate','Berhasil mengupdate data Dokumen!');
+        return redirect('/operator/mikrobiologi_personil')->with('successUpdate', 'Berhasil mengupdate data Dokumen!');
     }
 
     public function OP_mikrobiologi_personil_pdf($id)
@@ -348,7 +358,7 @@ class MikrobiologiPersonilController extends Controller
         $mikrobiologi_personil = Mikrobiologi_personil::where('id', $id)->first();
 
         $pdf = PDF::setOptions(['defaultFont' => 'sans-serif', 'isHtml5ParserEnabled' => true, 'isRemoteEnabled' => true]);
-        $pdf = PDF::loadView('pdf.mikrobiologi_personil_pdf', array('mikrobiologi_personil' => $mikrobiologi_personil, 'sampel_mikrobiologi_personil'=>$sampel_mikrobiologi_personil))->setOptions(['defaultFont' => 'sans-serif']);
+        $pdf = PDF::loadView('pdf.mikrobiologi_personil_pdf', array('mikrobiologi_personil' => $mikrobiologi_personil, 'sampel_mikrobiologi_personil' => $sampel_mikrobiologi_personil))->setOptions(['defaultFont' => 'sans-serif']);
         // $pdf = PDF::loadView('pdf.mikrobiologi_air_pdf', array('mikrobiologi_airs' => $mikrobiologi_airs, 'sampel_mikrobiologi_airs'=>$sampel_mikrobiologi_airs))->setPaper('a5', 'landscape')->setOptions(['defaultFont' => 'sans-serif']);
         // return $pdf->stream();
         $filename = 'Laporan Analisa Mikrobiologi Personil ' . $mikrobiologi_personil->nodokumen . '.pdf';
@@ -436,8 +446,8 @@ class MikrobiologiPersonilController extends Controller
     {
         $request->validate([
             'ttd_staff' => 'required',
-        ],[
-           'ttd_staff' => 'Kolom TTD harus di isi!',
+        ], [
+            'ttd_staff' => 'Kolom TTD harus di isi!',
         ]);
         Mikrobiologi_personil::where('id', $id)->update([
             'statusST' => 1,
@@ -466,7 +476,7 @@ class MikrobiologiPersonilController extends Controller
         $mikrobiologi_personil = Mikrobiologi_personil::where('id', $id)->first();
 
         $pdf = PDF::setOptions(['defaultFont' => 'sans-serif', 'isHtml5ParserEnabled' => true, 'isRemoteEnabled' => true]);
-        $pdf = PDF::loadView('pdf.mikrobiologi_personil_pdf', array('mikrobiologi_personil' => $mikrobiologi_personil, 'sampel_mikrobiologi_personil'=>$sampel_mikrobiologi_personil))->setOptions(['defaultFont' => 'sans-serif']);
+        $pdf = PDF::loadView('pdf.mikrobiologi_personil_pdf', array('mikrobiologi_personil' => $mikrobiologi_personil, 'sampel_mikrobiologi_personil' => $sampel_mikrobiologi_personil))->setOptions(['defaultFont' => 'sans-serif']);
         // $pdf = PDF::loadView('pdf.mikrobiologi_air_pdf', array('mikrobiologi_airs' => $mikrobiologi_airs, 'sampel_mikrobiologi_airs'=>$sampel_mikrobiologi_airs))->setPaper('a5', 'landscape')->setOptions(['defaultFont' => 'sans-serif']);
         // return $pdf->stream();
         $filename = 'Laporan Analisa Mikrobiologi Personil ' . $mikrobiologi_personil->nodokumen . '.pdf';
@@ -483,7 +493,7 @@ class MikrobiologiPersonilController extends Controller
 
 
 
-     ////Function Supervisor
+    ////Function Supervisor
     public function supervisor_mikrobiologi_personil(Request $request)
     {
         // $mikrobiologi_airs = Mikrobiologi_produk::all();
@@ -509,8 +519,8 @@ class MikrobiologiPersonilController extends Controller
     {
         $request->validate([
             'ttd_supervisor' => 'required',
-        ],[
-           'ttd_supervisor' => 'Kolom TTD harus di isi!',
+        ], [
+            'ttd_supervisor' => 'Kolom TTD harus di isi!',
         ]);
         Mikrobiologi_personil::where('id', $id)->update([
             'statusSP' => 1,
@@ -529,7 +539,7 @@ class MikrobiologiPersonilController extends Controller
         $mikrobiologi_personil = Mikrobiologi_personil::where('id', $id)->first();
 
         $pdf = PDF::setOptions(['defaultFont' => 'sans-serif', 'isHtml5ParserEnabled' => true, 'isRemoteEnabled' => true]);
-        $pdf = PDF::loadView('pdf.mikrobiologi_personil_pdf', array('mikrobiologi_personil' => $mikrobiologi_personil, 'sampel_mikrobiologi_personil'=>$sampel_mikrobiologi_personil))->setOptions(['defaultFont' => 'sans-serif']);
+        $pdf = PDF::loadView('pdf.mikrobiologi_personil_pdf', array('mikrobiologi_personil' => $mikrobiologi_personil, 'sampel_mikrobiologi_personil' => $sampel_mikrobiologi_personil))->setOptions(['defaultFont' => 'sans-serif']);
         // $pdf = PDF::loadView('pdf.mikrobiologi_air_pdf', array('mikrobiologi_airs' => $mikrobiologi_airs, 'sampel_mikrobiologi_airs'=>$sampel_mikrobiologi_airs))->setPaper('a5', 'landscape')->setOptions(['defaultFont' => 'sans-serif']);
         // return $pdf->stream();
         $filename = 'Laporan Analisa Mikrobiologi Personil ' . $mikrobiologi_personil->nodokumen . '.pdf';
@@ -598,7 +608,7 @@ class MikrobiologiPersonilController extends Controller
         $mikrobiologi_personil = Mikrobiologi_personil::where('id', $id)->first();
 
         $pdf = PDF::setOptions(['defaultFont' => 'sans-serif', 'isHtml5ParserEnabled' => true, 'isRemoteEnabled' => true]);
-        $pdf = PDF::loadView('pdf.mikrobiologi_personil_pdf', array('mikrobiologi_personil' => $mikrobiologi_personil, 'sampel_mikrobiologi_personil'=>$sampel_mikrobiologi_personil))->setOptions(['defaultFont' => 'sans-serif']);
+        $pdf = PDF::loadView('pdf.mikrobiologi_personil_pdf', array('mikrobiologi_personil' => $mikrobiologi_personil, 'sampel_mikrobiologi_personil' => $sampel_mikrobiologi_personil))->setOptions(['defaultFont' => 'sans-serif']);
         // $pdf = PDF::loadView('pdf.mikrobiologi_air_pdf', array('mikrobiologi_airs' => $mikrobiologi_airs, 'sampel_mikrobiologi_airs'=>$sampel_mikrobiologi_airs))->setPaper('a5', 'landscape')->setOptions(['defaultFont' => 'sans-serif']);
         // return $pdf->stream();
         $filename = 'Laporan Analisa Mikrobiologi Personil ' . $mikrobiologi_personil->nodokumen . '.pdf';
@@ -632,7 +642,7 @@ class MikrobiologiPersonilController extends Controller
 
 
 
-     public function index()
+    public function index()
     {
         //
     }

@@ -30,27 +30,43 @@ class MikrobiologiProsesProduksiController extends Controller
 
     // Controller Operator
     public function mikrobiologi_proses_produksi(Request $request)
-    {
-        // $mikrobiologi_proses_produksi = Mikrobiologi_proses_produksi::all();
-        // $mikrobiologi_proses_produksi = Mikrobiologi_proses_produksi::where('delete', 0)->get();
-        $mikrobiologi_proses_produksi = Mikrobiologi_proses_produksi::where('delete', 0);
+{
+    $mikrobiologi_proses_produksi = Mikrobiologi_proses_produksi::where('delete', 0);
 
-        // if ($request->has('tgl_inokulasi') && $request->has('tgl_pengamatan')) {
-        //     $tgl_inokulasi = Carbon::parse($request->tgl_inokulasi)->toDateTimeString();
-        //     $tgl_pengamatan = Carbon::parse($request->tgl_pengamatan)->toDateTimeString();
-        //     $mikrobiologi_proses_produksi->whereBetween('tgl_inokulasi', [$tgl_inokulasi, $tgl_pengamatan]);
-        // }
-        if ($request->has('tgl_mulai') && $request->has('tgl_selesai')) {
-            $tgl_mulai = Carbon::parse($request->tgl_mulai)->toDateTimeString();
-            $tgl_selesai = Carbon::parse($request->tgl_selesai)->toDateTimeString();
-            $mikrobiologi_proses_produksi->whereBetween('tgl_inokulasi', [$tgl_mulai, $tgl_selesai]);
-        }
+    // Ambil daftar tahun unik dari data tgl_inokulasi
+    $years = Mikrobiologi_proses_produksi::selectRaw('YEAR(tgl_inokulasi) as year')
+        ->where('delete', 0)
+        ->distinct()
+        ->pluck('year')
+        ->sortDesc();
 
-        $mikrobiologi_proses_produksi = $mikrobiologi_proses_produksi->orderBy('id', 'asc')->paginate(10)->onEachSide(10)->appends(request()->except('page')); //asc dari awal ke akhir
-        return view('mikrobiologi_proses_produksi.operator.mikrobiologi_proses_produksi', compact('mikrobiologi_proses_produksi'))->with('no', ($mikrobiologi_proses_produksi->currentPage() - 1) * $mikrobiologi_proses_produksi->perPage() + 1);
-
-        // return view('mikrobiologi_proses_produksi.operator.mikrobiologi_proses_produksi', compact('mikrobiologi_proses_produksi'))->with('no');
+    // Filter berdasarkan rentang tanggal (opsional)
+    if ($request->has('tgl_mulai') && $request->has('tgl_selesai')) {
+        $tgl_mulai = Carbon::parse($request->tgl_mulai)->startOfDay();
+        $tgl_selesai = Carbon::parse($request->tgl_selesai)->endOfDay();
+        $mikrobiologi_proses_produksi->whereBetween('tgl_inokulasi', [$tgl_mulai, $tgl_selesai]);
     }
+
+    // Filter berdasarkan tahun
+    if ($request->has('year') && $request->year != '') {
+        $mikrobiologi_proses_produksi->whereYear('tgl_inokulasi', $request->year);
+    }
+
+    // Filter berdasarkan bulan
+    if ($request->has('month') && $request->month != '') {
+        $mikrobiologi_proses_produksi->whereMonth('tgl_inokulasi', $request->month);
+    }
+
+    $mikrobiologi_proses_produksi = $mikrobiologi_proses_produksi
+        ->orderBy('id', 'asc')
+        ->paginate(10)
+        ->onEachSide(10)
+        ->appends(request()->except('page'));
+
+    return view('mikrobiologi_proses_produksi.operator.mikrobiologi_proses_produksi', compact('mikrobiologi_proses_produksi', 'years'))
+        ->with('no', ($mikrobiologi_proses_produksi->currentPage() - 1) * $mikrobiologi_proses_produksi->perPage() + 1);
+}
+
 
 
     public function add_mikrobiologi_proses_produksi(Request $request)

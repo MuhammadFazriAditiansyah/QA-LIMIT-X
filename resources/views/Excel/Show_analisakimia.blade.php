@@ -148,8 +148,8 @@
     </table>
 
 
-    <div class="export-excel" style="padding:10px; float:right;">
-        <a href="/operator/analisakimia/exportExcel/{{ $futami->id }}" onclick="hideLogoImage()">Export</a>
+    <div class="export-excel" style="padding: 10px; float: right; background-color: rgb(0, 213, 0); margin-top: 10px; border-radius: 5px;">
+        <a href="/operator/analisakimia/exportExcel/{{ $futami->id }}" onclick="hideLogoImage()" style="color: rgb(255, 255, 255); text-decoration: none;">Export</a>
     </div>
 </body>
 </html>
