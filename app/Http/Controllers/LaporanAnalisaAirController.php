@@ -32,21 +32,31 @@ class LaporanAnalisaAirController extends Controller
      */
     public function laporan_analisa_air(Request $request)
     {
-        // $laporan_analisa_air = Laporan_analisa_air::where('delete', 0)->get();
+        $currentYear = date('Y');
+        $query = Laporan_analisa_air::where('delete', 0);
 
-        $laporan_analisa_air = Laporan_analisa_air::where('delete', 0);
+        // Filter tahun pakai tahun berjalan
+        $query->whereYear('tgl_sampling', $currentYear);
 
+        // Filter bulan jika ada
+        if ($request->filled('month')) {
+            $query->whereMonth('tgl_sampling', $request->month);
+        }
+
+        // Filter tanggal range (optional, jika masih mau pakai)
         if ($request->has('tgl_awal') && $request->has('tgl_akhir')) {
             $tgl_mulai = Carbon::parse($request->tgl_awal)->toDateTimeString();
             $tgl_selesai = Carbon::parse($request->tgl_akhir)->toDateTimeString();
-            $laporan_analisa_air->whereBetween('tgl_sampling', [$tgl_mulai, $tgl_selesai]);
+            $query->whereBetween('tgl_sampling', [$tgl_mulai, $tgl_selesai]);
         }
 
-        // $laporan_analisa_air = $laporan_analisa_air->orderBy('updated_at', 'asc')->paginate(10)->onEachSide(10)->appends(request()->except('page')); //asc dari awal ke akhir
-        $laporan_analisa_air = $laporan_analisa_air->orderBy('id', 'asc')->paginate(10)->onEachSide(10)->appends(request()->except('page')); //asc dari awal ke akhir
-        return view('laporan_analisa_air.operator.laporan_analisa_air', compact('laporan_analisa_air'))->with('no', ($laporan_analisa_air->currentPage() - 1) * $laporan_analisa_air->perPage() + 1);
+        $laporan_analisa_air = $query->orderBy('id', 'asc')
+            ->paginate(10)
+            ->onEachSide(10)
+            ->appends($request->except('page'));
 
-        // return view('laporan_analisa_air.operator.laporan_analisa_air', compact('laporan_analisa_air'))->with('no');
+        return view('laporan_analisa_air.operator.laporan_analisa_air', compact('laporan_analisa_air', 'currentYear'))
+            ->with('no', ($laporan_analisa_air->currentPage() - 1) * $laporan_analisa_air->perPage() + 1);
     }
 
     public function add_laporan_analisa_air(Request $request)
@@ -61,7 +71,7 @@ class LaporanAnalisaAirController extends Controller
         $request->validate([
             'tgl_sampling' => 'required',
             'nodokumen' => 'required',
-        ],[
+        ], [
             'tgl_sampling.required' => 'Kolom tanggal produksi harus di isi',
             'nodokumen.required' => 'Kolom No dokumen harus di isi',
         ]);
@@ -137,7 +147,7 @@ class LaporanAnalisaAirController extends Controller
             'inputSampel' => 'required|array|min:1',
 
             'inputSampel.*.sampel' => 'required',
-        ],[
+        ], [
             'inputSampel.required' => 'Kolom Kode Sampling harus di isi',
             'inputSampel.array' => 'Kolom Kode Sampling harus berupa array',
             'inputSampel.min' => 'Minimal satu Kode Sampling harus diisi',
@@ -147,7 +157,7 @@ class LaporanAnalisaAirController extends Controller
 
         $laporan_analisa_air = Laporan_analisa_air::where('nodokumen', $request->nodokumen)->first();
 
-        foreach($request->inputSampel as $key => $value){
+        foreach ($request->inputSampel as $key => $value) {
             DB::table('sampel_laporan_analisa_airs')->insert([
                 'sampel' => $value['sampel'],
                 'id_dokumen' => $laporan_analisa_air->id,
@@ -155,7 +165,7 @@ class LaporanAnalisaAirController extends Controller
         }
 
         // dd($request->inputSampel);
-        return redirect('/operator/sampel_laporan_analisa_air/' .$laporan_analisa_air->id)->with('successAdd', 'Berhasil membuat Dokumen Baru!'); //mereturn / lewat / , bukan lewat name yang diberikan
+        return redirect('/operator/sampel_laporan_analisa_air/' . $laporan_analisa_air->id)->with('successAdd', 'Berhasil membuat Dokumen Baru!'); //mereturn / lewat / , bukan lewat name yang diberikan
     }
 
 
@@ -175,13 +185,13 @@ class LaporanAnalisaAirController extends Controller
     {
         $parameter = Parameter_pengujian::all();
         $laporan_analisa_air = Laporan_analisa_air::Where('id', $id)->first();
-        $data_laporan_analisa_air = Sampel_laporan_analisa_air::where([['id_dokumen', $laporan_analisa_air->id],['id', $sampel_id]])->first();
+        $data_laporan_analisa_air = Sampel_laporan_analisa_air::where([['id_dokumen', $laporan_analisa_air->id], ['id', $sampel_id]])->first();
         $sampel_null = Sampel_laporan_analisa_air::where('id', $sampel_id)->first();
         $pengujian = Pengujian_database::where('pengujian_id', $sampel_id)->get();
         // dd($pengujian);
 
 
-        return view('laporan_analisa_air.operator.option_sampel_laporan_analisa_air', compact('id','sampel_id', 'laporan_analisa_air', 'parameter', 'data_laporan_analisa_air', 'sampel_null', 'pengujian'));
+        return view('laporan_analisa_air.operator.option_sampel_laporan_analisa_air', compact('id', 'sampel_id', 'laporan_analisa_air', 'parameter', 'data_laporan_analisa_air', 'sampel_null', 'pengujian'));
     }
 
 
@@ -201,14 +211,14 @@ class LaporanAnalisaAirController extends Controller
         ]);
 
 
-        foreach($request->inputSampel as $key => $value){
+        foreach ($request->inputSampel as $key => $value) {
             DB::table('pengujian_laporan_analisa_airs')->insert([
                 'pengujian' => $value['pengujian'],
                 'shift_1' => $value['shift_1'],
                 'shift_2' => $value['shift_2'],
                 'keterangan' => $value['keterangan'],
-                'created_at'=> now(),
-                'updated_at'=> now(),
+                'created_at' => now(),
+                'updated_at' => now(),
                 'id_analisa_air' => $id,
                 'sampel_id' => $sampel_id,
             ]);
@@ -229,8 +239,8 @@ class LaporanAnalisaAirController extends Controller
     {
         $request->validate([
             'ttd_operator' => 'required',
-        ],[
-           'ttd_operator' => 'Kolom TTD harus di isi!',
+        ], [
+            'ttd_operator' => 'Kolom TTD harus di isi!',
         ]);
 
         Laporan_analisa_air::where('id', $id)->update([
@@ -246,7 +256,7 @@ class LaporanAnalisaAirController extends Controller
 
     public function laporan_analisa_air_Destroy($id)
     {
-        Laporan_analisa_air::where('id',$id)->update([
+        Laporan_analisa_air::where('id', $id)->update([
             'delete' => 1,
         ]);
 
@@ -255,7 +265,7 @@ class LaporanAnalisaAirController extends Controller
 
     public function laporan_analisa_air_restore($id)
     {
-        Laporan_analisa_air::where('id',$id)->update([
+        Laporan_analisa_air::where('id', $id)->update([
             'delete' => 0,
         ]);
 
@@ -302,13 +312,13 @@ class LaporanAnalisaAirController extends Controller
     public function show_laporan_analisa_air_sampel(Request $request, $id, $sampel_id)
     {
         $laporan_analisa_air = Laporan_analisa_air::Where('id', $id)->first();
-        $data_laporan_analisa_air = Sampel_laporan_analisa_air::where([['id_dokumen', $laporan_analisa_air->id],['id', $sampel_id]])->first();
+        $data_laporan_analisa_air = Sampel_laporan_analisa_air::where([['id_dokumen', $laporan_analisa_air->id], ['id', $sampel_id]])->first();
         $sampel_null = Sampel_laporan_analisa_air::where('id', $sampel_id)->first(); //ngambil sampel nya yg null
         $pengujian = Pengujian_database::where('pengujian_id', $sampel_id)->get();
         $sampel_laporan_analisa_air = Pengujian_laporan_analisa_air::where('sampel_id', $sampel_id)->get();
         // dd($sampel_laporan_analisa_air);
 
-        return view('laporan_analisa_air.operator.showSampel_laporan_analisa_air', compact('id','sampel_id', 'laporan_analisa_air', 'data_laporan_analisa_air', 'sampel_null', 'pengujian', 'sampel_laporan_analisa_air'));
+        return view('laporan_analisa_air.operator.showSampel_laporan_analisa_air', compact('id', 'sampel_id', 'laporan_analisa_air', 'data_laporan_analisa_air', 'sampel_null', 'pengujian', 'sampel_laporan_analisa_air'));
     }
 
     public function show_sampel_laporan_analisa_air_Delete(Request $request, $id, $sampel_id, $pengujian_id)
@@ -331,13 +341,13 @@ class LaporanAnalisaAirController extends Controller
     {
         $parameter = Parameter_pengujian::all();
         $laporan_analisa_air = Laporan_analisa_air::Where('id', $id)->first();
-        $data_laporan_analisa_air = Sampel_laporan_analisa_air::where([['id_dokumen', $laporan_analisa_air->id],['id', $sampel_id]])->first();
+        $data_laporan_analisa_air = Sampel_laporan_analisa_air::where([['id_dokumen', $laporan_analisa_air->id], ['id', $sampel_id]])->first();
         $sampel_null = Sampel_laporan_analisa_air::where('id', $sampel_id)->first();
         $pengujian = Pengujian_database::where('pengujian_id', $sampel_id)->get();
         $sampel_laporan_analisa_air = Pengujian_laporan_analisa_air::where([['sampel_id', $sampel_id], ['id_analisa_air', $id]])->get();
         // dd($sampel_laporan_analisa_air);
 
-        return view('laporan_analisa_air.operator.edit_sampel_laporan_analisa_air', compact('id','sampel_id', 'parameter','laporan_analisa_air', 'data_laporan_analisa_air', 'sampel_null', 'pengujian', 'sampel_laporan_analisa_air'));
+        return view('laporan_analisa_air.operator.edit_sampel_laporan_analisa_air', compact('id', 'sampel_id', 'parameter', 'laporan_analisa_air', 'data_laporan_analisa_air', 'sampel_null', 'pengujian', 'sampel_laporan_analisa_air'));
     }
 
 
@@ -347,7 +357,7 @@ class LaporanAnalisaAirController extends Controller
             'inputSampel' => 'required|array|min:1',
             'inputSampel.*.pengujian' => 'required',
             'inputSampel.*.keterangan' => 'required',
-        ],[
+        ], [
             'inputSampel.required' => 'Kolom Kode Sampling harus di isi',
             'inputSampel.array' => 'Kolom Kode Sampling harus berupa array',
             'inputSampel.min' => 'Minimal satu Kode Sampling harus diisi',
@@ -412,7 +422,7 @@ class LaporanAnalisaAirController extends Controller
         // dd($sampel_null);
 
         $pdf = PDF::setOptions(['defaultFont' => 'sans-serif', 'isHtml5ParserEnabled' => true, 'isRemoteEnabled' => true]);
-        $pdf = PDF::loadView('pdf.laporan_analisa_air_pdf', array('laporan_analisa_air' => $laporan_analisa_air, 'sampel_laporan_analisa_air' => $sampel_laporan_analisa_air, 'pengujian_laporan_analisa_air'=>$pengujian_laporan_analisa_air, 'sampel_null'=>$sampel_null, 'no'=>$no))->setOptions(['defaultFont' => 'sans-serif']);
+        $pdf = PDF::loadView('pdf.laporan_analisa_air_pdf', array('laporan_analisa_air' => $laporan_analisa_air, 'sampel_laporan_analisa_air' => $sampel_laporan_analisa_air, 'pengujian_laporan_analisa_air' => $pengujian_laporan_analisa_air, 'sampel_null' => $sampel_null, 'no' => $no))->setOptions(['defaultFont' => 'sans-serif']);
 
         // return $pdf->stream();
 
@@ -507,8 +517,8 @@ class LaporanAnalisaAirController extends Controller
     {
         $request->validate([
             'ttd_staff' => 'required',
-        ],[
-           'ttd_staff' => 'Kolom TTD harus di isi!',
+        ], [
+            'ttd_staff' => 'Kolom TTD harus di isi!',
         ]);
 
         Laporan_analisa_air::where('id', $id)->update([
@@ -540,8 +550,8 @@ class LaporanAnalisaAirController extends Controller
         $sampel_null = Sampel_laporan_analisa_air::where('id_dokumen', null)->get();
         // dd($sampel_null);
 
-        $pdf = PDF ::setOptions(['defaultFont' => 'sans-serif', 'isHtml5ParserEnabled' => true, 'isRemoteEnabled' => true]);
-        $pdf = PDF::loadView('pdf.laporan_analisa_air_pdf', array('laporan_analisa_air' => $laporan_analisa_air, 'sampel_laporan_analisa_air' => $sampel_laporan_analisa_air, 'pengujian_laporan_analisa_air'=>$pengujian_laporan_analisa_air, 'sampel_null'=>$sampel_null, 'no'=>$no))->setOptions(['defaultFont' => 'sans-serif']);
+        $pdf = PDF::setOptions(['defaultFont' => 'sans-serif', 'isHtml5ParserEnabled' => true, 'isRemoteEnabled' => true]);
+        $pdf = PDF::loadView('pdf.laporan_analisa_air_pdf', array('laporan_analisa_air' => $laporan_analisa_air, 'sampel_laporan_analisa_air' => $sampel_laporan_analisa_air, 'pengujian_laporan_analisa_air' => $pengujian_laporan_analisa_air, 'sampel_null' => $sampel_null, 'no' => $no))->setOptions(['defaultFont' => 'sans-serif']);
 
         // return $pdf->stream();
 
@@ -562,7 +572,7 @@ class LaporanAnalisaAirController extends Controller
 
 
 
-     ////Function Supervisor
+    ////Function Supervisor
     public function supervisor_laporan_analisa_air(Request $request)
     {
         $laporan_analisa_air = Laporan_analisa_air::where('delete', 0);
@@ -582,8 +592,8 @@ class LaporanAnalisaAirController extends Controller
     {
         $request->validate([
             'ttd_supervisor' => 'required',
-        ],[
-           'ttd_supervisor' => 'Kolom TTD harus di isi!',
+        ], [
+            'ttd_supervisor' => 'Kolom TTD harus di isi!',
         ]);
 
         Laporan_analisa_air::where('id', $id)->update([
@@ -606,7 +616,7 @@ class LaporanAnalisaAirController extends Controller
         // dd($sampel_null);
 
         $pdf = PDF::setOptions(['defaultFont' => 'sans-serif', 'isHtml5ParserEnabled' => true, 'isRemoteEnabled' => true]);
-        $pdf = PDF::loadView('pdf.laporan_analisa_air_pdf', array('laporan_analisa_air' => $laporan_analisa_air, 'sampel_laporan_analisa_air' => $sampel_laporan_analisa_air, 'pengujian_laporan_analisa_air'=>$pengujian_laporan_analisa_air, 'sampel_null'=>$sampel_null, 'no'=>$no))->setOptions(['defaultFont' => 'sans-serif']);
+        $pdf = PDF::loadView('pdf.laporan_analisa_air_pdf', array('laporan_analisa_air' => $laporan_analisa_air, 'sampel_laporan_analisa_air' => $sampel_laporan_analisa_air, 'pengujian_laporan_analisa_air' => $pengujian_laporan_analisa_air, 'sampel_null' => $sampel_null, 'no' => $no))->setOptions(['defaultFont' => 'sans-serif']);
 
         // return $pdf->stream();
 
@@ -665,13 +675,13 @@ class LaporanAnalisaAirController extends Controller
     public function superadmin_laporan_analisa_air_sampelShow(Request $request, $id, $sampel_id)
     {
         $laporan_analisa_air = Laporan_analisa_air::Where('id', $id)->first();
-        $data_laporan_analisa_air = Sampel_laporan_analisa_air::where([['id_dokumen', $laporan_analisa_air->id],['id', $sampel_id]])->first();
+        $data_laporan_analisa_air = Sampel_laporan_analisa_air::where([['id_dokumen', $laporan_analisa_air->id], ['id', $sampel_id]])->first();
         $sampel_null = Sampel_laporan_analisa_air::where('id', $sampel_id)->first();
         $pengujian = Pengujian_database::where('pengujian_id', $sampel_id)->get();
         $sampel_laporan_analisa_air = Pengujian_laporan_analisa_air::where('sampel_id', $sampel_id)->get();
         // dd($sampel_laporan_analisa_air);
 
-        return view('laporan_analisa_air.superadmin.showSampel_laporan_analisa_air', compact('id','sampel_id', 'laporan_analisa_air', 'data_laporan_analisa_air', 'sampel_null', 'pengujian', 'sampel_laporan_analisa_air'));
+        return view('laporan_analisa_air.superadmin.showSampel_laporan_analisa_air', compact('id', 'sampel_id', 'laporan_analisa_air', 'data_laporan_analisa_air', 'sampel_null', 'pengujian', 'sampel_laporan_analisa_air'));
     }
 
     public function SA_laporan_analisa_air_pdf($id)
@@ -684,7 +694,7 @@ class LaporanAnalisaAirController extends Controller
         // dd($sampel_null);
 
         $pdf = PDF::setOptions(['defaultFont' => 'sans-serif', 'isHtml5ParserEnabled' => true, 'isRemoteEnabled' => true]);
-        $pdf = PDF::loadView('pdf.laporan_analisa_air_pdf', array('laporan_analisa_air' => $laporan_analisa_air, 'sampel_laporan_analisa_air' => $sampel_laporan_analisa_air, 'pengujian_laporan_analisa_air'=>$pengujian_laporan_analisa_air, 'sampel_null'=>$sampel_null, 'no'=>$no))->setOptions(['defaultFont' => 'sans-serif']);
+        $pdf = PDF::loadView('pdf.laporan_analisa_air_pdf', array('laporan_analisa_air' => $laporan_analisa_air, 'sampel_laporan_analisa_air' => $sampel_laporan_analisa_air, 'pengujian_laporan_analisa_air' => $pengujian_laporan_analisa_air, 'sampel_null' => $sampel_null, 'no' => $no))->setOptions(['defaultFont' => 'sans-serif']);
 
         // return $pdf->stream();
 

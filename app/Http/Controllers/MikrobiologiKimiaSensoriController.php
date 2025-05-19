@@ -32,20 +32,40 @@ class MikrobiologiKimiaSensoriController extends Controller
     // Operator Function
     public function mikrobiologi_kimia_sensori(Request $request)
     {
-        // $mikrobiologi_kimia_sensori = Mikrobiologi_kimia_sensori::where('delete', 0)->get();
+        $query = Mikrobiologi_kimia_sensori::where('delete', 0);
 
-        $mikrobiologi_kimia_sensori = Mikrobiologi_kimia_sensori::where('delete', 0);
+        // Tahun pakai tahun berjalan saja
+        $currentYear = date('Y');
 
-        if ($request->has('tgl_produksi_awal') && $request->has('tgl_produksi_akhir')) {
-            $tgl_mulai = Carbon::parse($request->tgl_produksi_awal)->toDateTimeString();
-            $tgl_selesai = Carbon::parse($request->tgl_produksi_akhir)->toDateTimeString();
-            $mikrobiologi_kimia_sensori->whereBetween('tgl_produksi', [$tgl_mulai, $tgl_selesai]);
+        // Filter tahun dari request, tapi jika kosong, pakai tahun sekarang
+        $tahun = $request->input('tahun', $currentYear);
+
+        // Filter bulan, bisa kosong
+        $bulan = $request->input('bulan');
+
+        // Filter berdasarkan tahun dan bulan jika ada
+        if ($tahun) {
+            $query->whereYear('tgl_produksi', $tahun);
         }
 
-        $mikrobiologi_kimia_sensori = $mikrobiologi_kimia_sensori->orderBy('id', 'asc')->paginate(10)->onEachSide(10)->appends(request()->except('page')); //asc dari awal ke akhir
-        return view('mikrobiologi_kimia_sensori.operator.mikrobiologi_kimia_sensori', compact('mikrobiologi_kimia_sensori'))->with('no', ($mikrobiologi_kimia_sensori->currentPage() - 1) * $mikrobiologi_kimia_sensori->perPage() + 1);
+        if ($bulan) {
+            $query->whereMonth('tgl_produksi', $bulan);
+        }
 
-        // return view('mikrobiologi_kimia_sensori.operator.mikrobiologi_kimia_sensori', compact('mikrobiologi_kimia_sensori'))->with('no');
+        // Opsional juga filter tanggal produksi awal dan akhir (kalau kamu mau)
+        if ($request->has('tgl_produksi_awal') && $request->has('tgl_produksi_akhir')) {
+            $tgl_mulai = Carbon::parse($request->tgl_produksi_awal)->startOfDay();
+            $tgl_selesai = Carbon::parse($request->tgl_produksi_akhir)->endOfDay();
+            $query->whereBetween('tgl_produksi', [$tgl_mulai, $tgl_selesai]);
+        }
+
+        $mikrobiologi_kimia_sensori = $query->orderBy('id', 'asc')
+            ->paginate(10)
+            ->onEachSide(10)
+            ->appends($request->except('page'));
+
+        return view('mikrobiologi_kimia_sensori.operator.mikrobiologi_kimia_sensori', compact('mikrobiologi_kimia_sensori'))
+            ->with('no', ($mikrobiologi_kimia_sensori->currentPage() - 1) * $mikrobiologi_kimia_sensori->perPage() + 1);
     }
 
     public function add_mikrobiologi_kimia_sensori(Request $request)
@@ -62,7 +82,7 @@ class MikrobiologiKimiaSensoriController extends Controller
             'nama_produk' => 'required',
             'jumlah_batch' => 'required',
             'nodokumen' => 'required',
-        ],[
+        ], [
             'tgl_produksi.required' => 'Kolom tanggal produksi harus di isi',
             'nama_produk.required' => 'Kolom nama produk harus di isi',
             'jumlah_batch.required' => 'Kolom jumlah batch harus di isi',
@@ -162,7 +182,7 @@ class MikrobiologiKimiaSensoriController extends Controller
         ]);
 
         // dd($mikrobiologiProdukPercobaan);
-        return redirect('/operator/sampel_mikrobiologi_kimia_sensori/' .$mikrobiologi_kimia_sensori->id)->with('successAdd', 'Berhasil membuat Dokumen Baru!'); //mereturn / lewat / , bukan lewat name yang diberikan
+        return redirect('/operator/sampel_mikrobiologi_kimia_sensori/' . $mikrobiologi_kimia_sensori->id)->with('successAdd', 'Berhasil membuat Dokumen Baru!'); //mereturn / lewat / , bukan lewat name yang diberikan
     }
 
     public function sampel_mikrobiologi_kimia_sensori(Request $request, $id)
@@ -184,7 +204,7 @@ class MikrobiologiKimiaSensoriController extends Controller
             'inputSampel.*.kode_sampling' => 'required',
             'inputSampel.*.waktu' => 'required',
             'inputSampel.*.exp_date' => 'required',
-        ],[
+        ], [
             'inputSampel.required' => 'Kolom Kode Sampling harus di isi',
             'inputSampel.array' => 'Kolom Kode Sampling harus berupa array',
             'inputSampel.min' => 'Minimal satu Kode Sampling harus diisi',
@@ -194,7 +214,7 @@ class MikrobiologiKimiaSensoriController extends Controller
             'inputSampel.*.exp_date.required' => 'Kolom Exp Date harus di isi',
         ]);
 
-        foreach($request->inputSampel as $key => $value){
+        foreach ($request->inputSampel as $key => $value) {
             DB::table('sampel_mikrobiologi_kimia_sensoris')->insert([
                 'kode_sampling' => $value['kode_sampling'],
                 'waktu' => $value['waktu'],
@@ -222,8 +242,8 @@ class MikrobiologiKimiaSensoriController extends Controller
     {
         $request->validate([
             'ttd_operator' => 'required',
-        ],[
-           'ttd_operator' => 'Kolom TTD harus di isi!',
+        ], [
+            'ttd_operator' => 'Kolom TTD harus di isi!',
         ]);
 
         Mikrobiologi_kimia_sensori::where('id', $id)->update([
@@ -235,11 +255,11 @@ class MikrobiologiKimiaSensoriController extends Controller
         ]);
 
         return redirect()->route('mikrobiologi_kimia_sensori')->with('operatorttd', 'Data telah ditandatangani oleh Operator!');
-   }
+    }
 
     public function mikrobiologi_kimia_sensori_Destroy($id)
     {
-        Mikrobiologi_kimia_sensori::where('id',$id)->update([
+        Mikrobiologi_kimia_sensori::where('id', $id)->update([
             'delete' => 1,
         ]);
 
@@ -296,7 +316,7 @@ class MikrobiologiKimiaSensoriController extends Controller
             'tgl_produksi' => 'required',
             'nama_produk' => 'required',
             'jumlah_batch' => 'required',
-        ],[
+        ], [
             'tgl_produksi.required' => 'Kolom tanggal produksi harus di isi',
             'nama_produk.required' => 'Kolom nama produk harus di isi',
             'jumlah_batch.required' => 'Kolom jumlah batch harus di isi',
@@ -336,7 +356,7 @@ class MikrobiologiKimiaSensoriController extends Controller
             'inputSampel.*.kode_sampling' => 'required',
             'inputSampel.*.waktu' => 'required',
             'inputSampel.*.exp_date' => 'required',
-        ],[
+        ], [
             'inputSampel.*.kode_sampling.required' => 'Kolom Kode Sampling harus di isi',
             'inputSampel.*.waktu.required' => 'Kolom Waktu harus di isi',
             'inputSampel.*.exp_date.required' => 'Kolom Exp Date harus di isi',
@@ -381,7 +401,7 @@ class MikrobiologiKimiaSensoriController extends Controller
         Mikrobiologi_kimia_sensori::find($id)->Sampel_mikrobiologi_kimia_sensori()->delete();
         Mikrobiologi_kimia_sensori::find($id)->Sampel_mikrobiologi_kimia_sensori()->saveMany($sampel_data);
 
-        return redirect('/operator/mikrobiologi_kimia_sensori')->with('successUpdate','Berhasil mengupdate data Dokumen!');
+        return redirect('/operator/mikrobiologi_kimia_sensori')->with('successUpdate', 'Berhasil mengupdate data Dokumen!');
     }
 
     public function OP_mikrobiologi_kimia_sensori_pdf($id)
@@ -390,7 +410,7 @@ class MikrobiologiKimiaSensoriController extends Controller
         $mikrobiologi_kimia_sensori = Mikrobiologi_kimia_sensori::where('id', $id)->first();
 
         $pdf = PDF::setOptions(['defaultFont' => 'sans-serif', 'isHtml5ParserEnabled' => true, 'isRemoteEnabled' => true]);
-        $pdf = PDF::loadView('pdf.mikrobiologi_kimia_sensori_pdf', array('mikrobiologi_kimia_sensori' => $mikrobiologi_kimia_sensori, 'sampel_mikrobiologi_kimia_sensori'=>$sampel_mikrobiologi_kimia_sensori))->setPaper('a5', 'landscape')->setOptions(['defaultFont' => 'sans-serif']);
+        $pdf = PDF::loadView('pdf.mikrobiologi_kimia_sensori_pdf', array('mikrobiologi_kimia_sensori' => $mikrobiologi_kimia_sensori, 'sampel_mikrobiologi_kimia_sensori' => $sampel_mikrobiologi_kimia_sensori))->setPaper('a5', 'landscape')->setOptions(['defaultFont' => 'sans-serif']);
 
         // return $pdf->stream();
 
@@ -495,8 +515,8 @@ class MikrobiologiKimiaSensoriController extends Controller
     {
         $request->validate([
             'ttd_staff' => 'required',
-        ],[
-           'ttd_staff' => 'Kolom TTD harus di isi!',
+        ], [
+            'ttd_staff' => 'Kolom TTD harus di isi!',
         ]);
 
         Mikrobiologi_kimia_sensori::where('id', $id)->update([
@@ -526,7 +546,7 @@ class MikrobiologiKimiaSensoriController extends Controller
         $mikrobiologi_kimia_sensori = Mikrobiologi_kimia_sensori::where('id', $id)->first();
 
         $pdf = PDF::setOptions(['defaultFont' => 'sans-serif', 'isHtml5ParserEnabled' => true, 'isRemoteEnabled' => true]);
-        $pdf = PDF::loadView('pdf.mikrobiologi_kimia_sensori_pdf', array('mikrobiologi_kimia_sensori' => $mikrobiologi_kimia_sensori, 'sampel_mikrobiologi_kimia_sensori'=>$sampel_mikrobiologi_kimia_sensori))->setPaper('a5', 'landscape')->setOptions(['defaultFont' => 'sans-serif']);
+        $pdf = PDF::loadView('pdf.mikrobiologi_kimia_sensori_pdf', array('mikrobiologi_kimia_sensori' => $mikrobiologi_kimia_sensori, 'sampel_mikrobiologi_kimia_sensori' => $sampel_mikrobiologi_kimia_sensori))->setPaper('a5', 'landscape')->setOptions(['defaultFont' => 'sans-serif']);
         // $pdf = PDF::loadView('pdf.mikrobiologi_air_pdf', array('mikrobiologi_airs' => $mikrobiologi_airs, 'sampel_mikrobiologi_airs'=>$sampel_mikrobiologi_airs))->setPaper('a5', 'landscape')->setOptions(['defaultFont' => 'sans-serif']);
         // return $pdf->stream();
         $filename = 'Laporan Pemeriksaan Kimia Dan Sensori ' . $mikrobiologi_kimia_sensori->nodokumen . '.pdf';
@@ -543,7 +563,7 @@ class MikrobiologiKimiaSensoriController extends Controller
 
 
 
-     ////Function Supervisor
+    ////Function Supervisor
     public function supervisor_mikrobiologi_kimia_sensori(Request $request)
     {
         // $mikrobiologi_airs = Mikrobiologi_produk::all();
@@ -564,8 +584,8 @@ class MikrobiologiKimiaSensoriController extends Controller
     {
         $request->validate([
             'ttd_qaleader' => 'required',
-        ],[
-           'ttd_qaleader' => 'Kolom TTD harus di isi!',
+        ], [
+            'ttd_qaleader' => 'Kolom TTD harus di isi!',
         ]);
 
         Mikrobiologi_kimia_sensori::where('id', $id)->update([
@@ -585,7 +605,7 @@ class MikrobiologiKimiaSensoriController extends Controller
         $mikrobiologi_kimia_sensori = Mikrobiologi_kimia_sensori::where('id', $id)->first();
 
         $pdf = PDF::setOptions(['defaultFont' => 'sans-serif', 'isHtml5ParserEnabled' => true, 'isRemoteEnabled' => true]);
-        $pdf = PDF::loadView('pdf.mikrobiologi_kimia_sensori_pdf', array('mikrobiologi_kimia_sensori' => $mikrobiologi_kimia_sensori, 'sampel_mikrobiologi_kimia_sensori'=>$sampel_mikrobiologi_kimia_sensori))->setPaper('a5', 'landscape')->setOptions(['defaultFont' => 'sans-serif']);
+        $pdf = PDF::loadView('pdf.mikrobiologi_kimia_sensori_pdf', array('mikrobiologi_kimia_sensori' => $mikrobiologi_kimia_sensori, 'sampel_mikrobiologi_kimia_sensori' => $sampel_mikrobiologi_kimia_sensori))->setPaper('a5', 'landscape')->setOptions(['defaultFont' => 'sans-serif']);
 
         // return $pdf->stream();
 
@@ -668,7 +688,7 @@ class MikrobiologiKimiaSensoriController extends Controller
         $mikrobiologi_kimia_sensori = Mikrobiologi_kimia_sensori::where('id', $id)->first();
 
         $pdf = PDF::setOptions(['defaultFont' => 'sans-serif', 'isHtml5ParserEnabled' => true, 'isRemoteEnabled' => true]);
-        $pdf = PDF::loadView('pdf.mikrobiologi_kimia_sensori_pdf', array('mikrobiologi_kimia_sensori' => $mikrobiologi_kimia_sensori, 'sampel_mikrobiologi_kimia_sensori'=>$sampel_mikrobiologi_kimia_sensori))->setPaper('a5', 'landscape')->setOptions(['defaultFont' => 'sans-serif']);
+        $pdf = PDF::loadView('pdf.mikrobiologi_kimia_sensori_pdf', array('mikrobiologi_kimia_sensori' => $mikrobiologi_kimia_sensori, 'sampel_mikrobiologi_kimia_sensori' => $sampel_mikrobiologi_kimia_sensori))->setPaper('a5', 'landscape')->setOptions(['defaultFont' => 'sans-serif']);
 
         // return $pdf->stream();
 

@@ -28,38 +28,33 @@ class OperatorController extends Controller
 
     public function data(Request $request)
     {
-
-        // if(request()->tanggal_uji || request()->tanggal_selesai){
-        //     $tanggal_uji = Carbon::parse(request()->tanggal_uji)->toDateTimeString();
-        //     $tanggal_selesai = Carbon::parse(request()->tanggal_selesai)->toDateTimeString();
-
-        //     $futamis = Futami::orderBy('id', 'desc')->whereBetween('tanggal_uji', [$tanggal_uji, $tanggal_selesai])->get();
-        // }
-        // else {
-        // //    $futamis = Futami::all();
-        //     // $futamis = Futami::paginate(5)->onEachSide(5);
-        //     // $futamis = Futami::where([
-        //     //     ['delete', '=', 1],
-        //     // ])->get();
-        //     $futamis = Futami::where([
-        //         ['delete', '=', 0],
-        //     ])->paginate(5)->onEachSide(5);
-
-        // }
-
-        //membenarkan paginate
-
-        // $ttdoperator = User::where('id', 'user_id')->first();
         $futamis = Futami::where('delete', 0);
-        if ($request->has('tanggal_uji') && $request->has('tanggal_selesai')) {
+
+        // Filter tanggal uji
+        if ($request->filled('tanggal_uji') && $request->filled('tanggal_selesai')) {
             $tanggal_uji = Carbon::parse($request->tanggal_uji)->toDateTimeString();
             $tanggal_selesai = Carbon::parse($request->tanggal_selesai)->toDateTimeString();
             $futamis->whereBetween('tanggal_uji', [$tanggal_uji, $tanggal_selesai]);
         }
 
-        $futamis = $futamis->orderBy('id', 'asc')->paginate(5)->onEachSide(5)->appends(request()->except('page')); //asc dari awal ke akhir
+        // Filter tahun
+        if ($request->filled('tahun')) {
+            $futamis->whereYear('tanggal_uji', $request->tahun);
+        }
+
+        // Filter bulan
+        if ($request->filled('bulan')) {
+            $futamis->whereMonth('tanggal_uji', $request->bulan);
+        }
+
+        $futamis = $futamis->orderBy('id', 'asc')
+            ->paginate(5)
+            ->onEachSide(5)
+            ->appends(request()->except('page'));
+
         return view('operator.data', compact('futamis'))->with('no', ($futamis->currentPage() - 1) * $futamis->perPage() + 1);
     }
+
 
 
     public function tambahData()
